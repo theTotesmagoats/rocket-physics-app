@@ -174,15 +174,27 @@ function getPhaseExplanation(phase, state) {
     return explanations[phase] || `In phase: ${phase}`;
 }
 
-// Module exports
-const FlightPhases = {
-    FlightPhase,
-    getCurrentPhase,
-    detectPhaseTransition,
-    getTransitionExplanation,
-    getPhaseExplanation
-};
+// Export to global window object for browser use
+if (typeof window !== 'undefined') {
+    window.FlightPhases = {
+        FlightPhase,
+        getCurrentPhase,
+        detectPhaseTransition,
+        getTransitionExplanation,
+        getPhaseExplanation
+    };
+    
+    // Also export FlightPhase constant directly for easy access
+    window.FlightPhase = FlightPhase;
+}
 
+// Also export for Node.js/module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = FlightPhases;
+    module.exports = window.FlightPhases || {
+        FlightPhase,
+        getCurrentPhase,
+        detectPhaseTransition,
+        getTransitionExplanation,
+        getPhaseExplanation
+    };
 }
