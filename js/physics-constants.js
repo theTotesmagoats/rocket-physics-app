@@ -75,6 +75,12 @@ function getAirDensityExplanation(altitudeMeters, density) {
 }
 
 // Export for other modules
+if (typeof window !== 'undefined') {
+    window.PHYSICS_CONSTANTS = PHYSICS_CONSTANTS;
+    window.getAirDensityAtAltitude = getAirDensityAtAltitude;
+    window.getAirDensityExplanation = getAirDensityExplanation;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { PHYSICS_CONSTANTS, getAirDensityAtAltitude, getAirDensityExplanation };
 }
