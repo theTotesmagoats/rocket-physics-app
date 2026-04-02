@@ -148,13 +148,19 @@ async function handleSimulate() {
     }
     
     // Run simulation
-    console.log('🎯 Running simulation...');
-    const result = TrajectoryEngine.simulateFlight(config, launchConditions);
-    
-    console.log('📊 Simulation result:', result);
-    
-    // Display results
-    displayResults(result);
+    try {
+        console.log('🎯 Running simulation...');
+        const result = TrajectoryEngine.simulateFlight(config, launchConditions);
+        
+        console.log('📊 Simulation result:', result);
+        console.log('📊 Statistics:', result.statistics);
+        
+        // Display results
+        displayResults(result);
+    } catch (error) {
+        console.error('❌ SIMULATION ERROR:', error);
+        alert('Simulation failed: ' + error.message + '\nCheck console for details');
+    }
 }
 
 /**
