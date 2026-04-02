@@ -158,17 +158,28 @@ function checkMotorSuitability(motor, rocketMassKg) {
     return { suitability, ratio, explanation };
 }
 
-// Module exports
-const ThrustModule = {
-    getThrustAtTime,
-    calculateTotalImpulse,
-    getMotorClass,
-    getMassAtTime,
-    calculateAcceleration,
-    getMotorExplanation,
-    checkMotorSuitability
-};
+// Export to global window object for browser use
+if (typeof window !== 'undefined') {
+    window.ThrustModule = {
+        getThrustAtTime,
+        calculateTotalImpulse,
+        getMotorClass,
+        getMassAtTime,
+        calculateAcceleration,
+        getMotorExplanation,
+        checkMotorSuitability
+    };
+}
 
+// Also export for Node.js/module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = ThrustModule;
+    module.exports = window.ThrustModule || {
+        getThrustAtTime,
+        calculateTotalImpulse,
+        getMotorClass,
+        getMassAtTime,
+        calculateAcceleration,
+        getMotorExplanation,
+        checkMotorSuitability
+    };
 }
