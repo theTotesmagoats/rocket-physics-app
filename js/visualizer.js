@@ -253,7 +253,7 @@ function drawLegend(viz) {
     const { ctx } = viz;
     
     const legendY = 20;
-    const legendX = width - 150;
+    const legendX = viz.width - 150;
     
     // Legend background
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -316,14 +316,24 @@ function displayTeachingContent(teachingContent) {
     `).join('');
 }
 
-// Module exports
-const Visualizer = {
-    initializeVisualizer,
-    drawFlightVisualization,
-    displayStatistics,
-    displayTeachingContent
-};
+// Export to global window object for browser use
+if (typeof window !== 'undefined') {
+    window.Visualizer = {
+        initializeVisualizer,
+        drawFlightVisualization,
+        displayStatistics,
+        displayTeachingContent,
+        drawBackground
+    };
+}
 
+// Also export for Node.js/module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Visualizer;
+    module.exports = window.Visualizer || {
+        initializeVisualizer,
+        drawFlightVisualization,
+        displayStatistics,
+        displayTeachingContent,
+        drawBackground
+    };
 }
