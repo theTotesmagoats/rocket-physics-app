@@ -8,26 +8,49 @@
  */
 function initializeVisualizer() {
     const canvas = document.getElementById('flight-canvas');
-    if (!canvas) return null;
+    if (!canvas) {
+        console.error('❌ Canvas element not found!');
+        return null;
+    }
     
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('❌ Canvas context (2d) not available!');
+        return null;
+    }
     
-    return {
+    const viz = {
         canvas,
         ctx,
         width: canvas.width,
         height: canvas.height
     };
+    
+    console.log('🎨 Visualizer initialized:', viz);
+    
+    // Draw initial background
+    drawBackground(viz);
+    
+    return viz;
 }
 
 /**
  * Draw the complete flight visualization.
  */
 function drawFlightVisualization(viz, simulationResult) {
-    if (!viz || !simulationResult) return;
+    if (!viz || !simulationResult) {
+        console.error('❌ Visualization failed - missing viz or result');
+        return;
+    }
     
     const { ctx, width, height } = viz;
     const { trajectory, statistics } = simulationResult;
+    
+    console.log('📊 Drawing visualization with', trajectory.length, 'trajectory points');
+    if (trajectory.length > 0) {
+        console.log('   First point:', trajectory[0]);
+        console.log('   Last point:', trajectory[trajectory.length - 1]);
+    }
     
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
@@ -56,6 +79,7 @@ function drawFlightVisualization(viz, simulationResult) {
  */
 function calculateScale(trajectory, width, height) {
     if (trajectory.length === 0) {
+        console.warn('⚠️ Empty trajectory - no data to scale');
         return { x: 1, y: 1, offsetX: 0, offsetY: 0 };
     }
     
@@ -71,6 +95,8 @@ function calculateScale(trajectory, width, height) {
         minY = Math.min(minY, point.horizontalY);
         maxY = Math.max(maxY, point.horizontalY);
     });
+    
+    console.log('📏 Scale bounds - altitude:', maxAltitude.toFixed(2), 'm');
     
     // Add padding
     const padding = 50;
@@ -98,7 +124,10 @@ function calculateScale(trajectory, width, height) {
 function drawTrajectoryPath(viz, trajectory, scale) {
     const { ctx } = viz;
     
-    if (trajectory.length < 2) return;
+    if (trajectory.length < 2) {
+        console.warn('⚠️ Trajectory too short to draw:', trajectory.length);
+        return;
+    }
     
     // Find apogee index
     let apogeeIndex = 0;
@@ -107,6 +136,8 @@ function drawTrajectoryPath(viz, trajectory, scale) {
             apogeeIndex = idx;
         }
     });
+    
+    console.log('📈 Apogee at index', apogeeIndex, 'time:', trajectory[apogeeIndex]?.time.toFixed(2));
     
     // Draw ascent path (green)
     ctx.beginPath();
@@ -284,7 +315,16 @@ function drawLegend(viz) {
  */
 function displayStatistics(statistics) {
     const statsDiv = document.getElementById('flight-stats');
-    if (!statsDiv) return;
+    if (!statsDiv) {
+        console.error('❌ Stats div not found!');
+        return;
+    }
+    
+    if (Object.keys(statistics).length === 0) {
+        console.warn('⚠️ No statistics to display');
+        statsDiv.innerHTML = '<p>No flight data available</p>';
+        return;
+    }
     
     const stats = [
         { label: 'Peak Altitude', value: `${statistics.peakAltitudeFeet.toFixed(0)} ft`, icon: '⛰️' },
