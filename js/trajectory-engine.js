@@ -55,8 +55,8 @@ function simulateFlight(rocketConfig, launchConditions) {
         const deltaTime = APP_CONFIG.TIME_STEP;
         updateState(state, rocketConfig, launchConditions, deltaTime);
         
-        // Check for landing
-        if (state.altitude <= 0) {
+        // Check for landing (only if not on launch rod)
+        if (!state.onLaunchRod && state.altitude <= 0) {
             state.altitude = 0;
             state.velocity = 0;
             state.landed = true;
@@ -154,6 +154,11 @@ function updateState(state, rocketConfig, launchConditions, deltaTime) {
     const accelResult = ThrustModule.calculateAcceleration(thrust, dragForce, state.mass);
     let acceleration = accelResult.value;
     
+    // Constrain velocity during launch rod phase - rocket cannot fall down the rod
+    if (state.onLaunchRod && acceleration < 0) {
+        acceleration = 0;  // Prevent falling while on rod
+    }
+    
     // Check launch rod exit
     if (state.onLaunchRod && Math.abs(state.velocity) >= state.launchRodExitSpeed) {
         state.onLaunchRod = false;
@@ -216,7 +221,7 @@ function calculateFlightStatistics(trajectory, phaseTransitions) {
     const landingPoint = trajectory[trajectory.length - 1];
     
     // Find motor burnout point
-    const burnoutIndex = trajectory.findIndex(p => p.time >= p.mass);  // Simplified
+    const burnoutIndex = trajectory.findIndex(p => p.time >= rocketConfig.motor.burnTime);
     
     return {
         peakAltitude: peakPoint.altitude,
