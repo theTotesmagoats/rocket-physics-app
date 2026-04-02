@@ -68,7 +68,7 @@ function simulateFlight(rocketConfig, launchConditions) {
     }
     
     // Calculate summary statistics
-    const stats = calculateFlightStatistics(trajectory, phaseTransitions);
+    const stats = calculateFlightStatistics(trajectory, phaseTransitions, rocketConfig);
     
     return {
         trajectory,
@@ -211,7 +211,7 @@ function recordState(state) {
 /**
  * Calculate flight statistics from trajectory.
  */
-function calculateFlightStatistics(trajectory, phaseTransitions) {
+function calculateFlightStatistics(trajectory, phaseTransitions, rocketConfig) {
     if (trajectory.length === 0) return {};
     
     const peakIndex = trajectory.reduce((maxIdx, point, idx, arr) => 
@@ -221,7 +221,8 @@ function calculateFlightStatistics(trajectory, phaseTransitions) {
     const landingPoint = trajectory[trajectory.length - 1];
     
     // Find motor burnout point
-    const burnoutIndex = trajectory.findIndex(p => p.time >= rocketConfig.motor.burnTime);
+    const burnoutTime = rocketConfig?.motor?.burnTime || 2.0;  // Default to 2 seconds if not specified
+    const burnoutIndex = trajectory.findIndex(p => p.time >= burnoutTime);
     
     return {
         peakAltitude: peakPoint.altitude,
