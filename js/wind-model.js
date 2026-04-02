@@ -3,13 +3,13 @@
 // Where most rocket simulators fail - and where landing prediction lives
 // ============================================
 
-/**
+/** 
  * Convert wind direction from compass degrees to radians.
  * Aviation convention: 0° = North, 90° = East (clockwise)
  */
 function windDirectionToRadians(windDegrees) {
-    // Convert to radians and flip because math uses counter-clockwise from East
-    return (windDegrees - 90) * Math.PI / 180;
+    // Keep original convention for clarity; vector conversion handles direction flip
+    return windDegrees * Math.PI / 180;
 }
 
 /**
@@ -17,18 +17,19 @@ function windDirectionToRadians(windDegrees) {
  * Returns {vx, vy} in m/s where:
  * - vx: East-West component (positive = eastward)
  * - vy: North-South component (positive = northward)
+ *
+ * FIX: Wind direction is where the wind comes FROM.
+ * So a 0° wind (from North) should blow south (negative vy).
+ * A 90° wind (from East) should blow west (negative vx).
  */
 function getWindVelocityComponents(windSpeedMph, windDirectionDegrees) {
     const windSpeedMs = windSpeedMph * PHYSICS_CONSTANTS.MILES_PER_HOUR_TO_M_S;
-    const angleRad = windDirectionToRadians(windDirectionDegrees);
+    const rad = windDirectionToRadians(windDirectionDegrees);
     
-    // Wind direction is where wind comes FROM
-    // So we need to add 180° to get where it's going TO
-    const velocityAngle = angleRad + Math.PI;
-    
+    // Wind comes FROM direction, so vector points opposite to compass heading
     return {
-        vx: windSpeedMs * Math.sin(velocityAngle),  // East component
-        vy: windSpeedMs * Math.cos(velocityAngle)   // North component
+        vx: -windSpeedMs * Math.sin(rad),  // East component (0° → sin(0)=0, negative)
+        vy: -windSpeedMs * Math.cos(rad)   // North component (0° → cos(0)=1, negative)
     };
 }
 
