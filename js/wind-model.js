@@ -115,17 +115,28 @@ function getWindSpeedAtAltitude(groundWindSpeedMph, altitudeMeters) {
     return groundWindSpeedMph * Math.min(increaseFactor, 2);  // Cap at 2x ground speed
 }
 
-// Module exports
-const WindModel = {
-    windDirectionToRadians,
-    getWindVelocityComponents,
-    calculateHorizontalDrift,
-    estimateDownrangeDistance,
-    getDownrangeExplanation,
-    getWindDirectionString,
-    getWindSpeedAtAltitude
-};
+// Export to global window object for browser use
+if (typeof window !== 'undefined') {
+    window.WindModel = {
+        windDirectionToRadians,
+        getWindVelocityComponents,
+        calculateHorizontalDrift,
+        estimateDownrangeDistance,
+        getDownrangeExplanation,
+        getWindDirectionString,
+        getWindSpeedAtAltitude
+    };
+}
 
+// Also export for Node.js/module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = WindModel;
+    module.exports = window.WindModel || {
+        windDirectionToRadians,
+        getWindVelocityComponents,
+        calculateHorizontalDrift,
+        estimateDownrangeDistance,
+        getDownrangeExplanation,
+        getWindDirectionString,
+        getWindSpeedAtAltitude
+    };
 }
