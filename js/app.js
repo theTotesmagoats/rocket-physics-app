@@ -19,6 +19,20 @@ async function initializeApp() {
     // Load component data (with robust fallback)
     await loadComponentData();
     
+    // Verify all required modules are loaded
+    const requiredModules = [
+        'PHYSICS_CONSTANTS',
+        'DragModule', 'ThrustModule', 'FlightPhases',
+        'WindModel', 'ParachutePhysics',
+        'TrajectoryEngine', 'Visualizer', 'RocketBuilder'
+    ];
+    
+    console.log('📦 Checking module availability:');
+    requiredModules.forEach(moduleName => {
+        const exists = typeof window[moduleName] !== 'undefined';
+        console.log(`   ${exists ? '✅' : '❌'} ${moduleName}`);
+    });
+    
     // Verify we have data with correct shape
     if (!window.ROCKET_DATA || !Array.isArray(window.ROCKET_DATA.rockets)) {
         console.error('❌ Invalid rocket data structure! Using emergency fallback.');
@@ -41,6 +55,9 @@ async function initializeApp() {
     
     // Initialize visualizer
     visualizer = Visualizer.initializeVisualizer();
+    if (!visualizer) {
+        console.error('❌ Visualizer failed to initialize - canvas not found!');
+    }
     
     // Set up event listeners
     setupEventListeners();
