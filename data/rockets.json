@@ -1,0 +1,58 @@
+{
+  "rockets": [
+    {
+      "id": "estex_18_short",
+      "name": "Estes 18mm Short Body",
+      "diameter": 18,
+      "length": 203,
+      "mass": 0.025,
+      "fins": 3,
+      "description": "Entry-level rocket body, perfect for A-B class motors"
+    },
+    {
+      "id": "estex_18_long",
+      "name": "Estes 18mm Long Body",
+      "diameter": 18,
+      "length": 305,
+      "mass": 0.035,
+      "fins": 3,
+      "description": "Extended body for higher altitude flights"
+    },
+    {
+      "id": "estex_29_standard",
+      "name": "Estes 29mm Standard",
+      "diameter": 29,
+      "length": 305,
+      "mass": 0.045,
+      "fins": 4,
+      "description": "Classic medium rocket, handles C-D class motors well"
+    },
+    {
+      "id": "estex_29_tall",
+      "name": "Estes 29mm Tall Boy",
+      "diameter": 29,
+      "length": 457,
+      "mass": 0.065,
+      "fins": 4,
+      "description": "High-altitude rocket for D-E class motors"
+    },
+    {
+      "id": "apogee_38",
+      "name": "Apogee 38mm Competition",
+      "diameter": 38,
+      "length": 508,
+      "mass": 0.120,
+      "fins": 4,
+      "description": "Competition-grade rocket for high power flights"
+    },
+    {
+      "id": "custom_light",
+      "name": "Custom Lightweight",
+      "diameter": 25,
+      "length": 350,
+      "mass": 0.030,
+      "fins": 3,
+      "description": "Lightweight custom build for maximum altitude"
+    }
+  ]
+}
