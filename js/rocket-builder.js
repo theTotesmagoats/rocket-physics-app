@@ -9,6 +9,13 @@
 function initializeBuilder(data) {
     console.log('🔧 Initializing builder with data:', data);
     
+    // HARDENING: Validate data shape before proceeding
+    if (!data || !Array.isArray(data.rockets) || !Array.isArray(data.motors) || !Array.isArray(data.parachutes)) {
+        console.error('❌ Bad component data shape:', data);
+        console.error('Expected arrays for rockets, motors, parachutes');
+        return;
+    }
+    
     const rocketSelect = document.getElementById('rocket-select');
     const motorSelect = document.getElementById('motor-select');
     const parachuteSelect = document.getElementById('parachute-select');
@@ -28,43 +35,31 @@ function initializeBuilder(data) {
     parachuteSelect.innerHTML = '';
     
     // Populate rockets
-    if (data && data.rockets && Array.isArray(data.rockets)) {
-        console.log('🚀 Populating', data.rockets.length, 'rockets');
-        data.rockets.forEach(rocket => {
-            const option = document.createElement('option');
-            option.value = rocket.id;
-            option.textContent = `${rocket.name} (${rocket.diameter}mm, ${(rocket.mass*1000).toFixed(0)}g)`;
-            rocketSelect.appendChild(option);
-        });
-    } else {
-        console.error('❌ No rockets data found!');
-    }
+    console.log('🚀 Populating', data.rockets.length, 'rockets');
+    data.rockets.forEach(rocket => {
+        const option = document.createElement('option');
+        option.value = rocket.id;
+        option.textContent = `${rocket.name} (${rocket.diameter}mm, ${(rocket.mass*1000).toFixed(0)}g)`;
+        rocketSelect.appendChild(option);
+    });
     
     // Populate motors
-    if (data && data.motors && Array.isArray(data.motors)) {
-        console.log('⚡ Populating', data.motors.length, 'motors');
-        data.motors.forEach(motor => {
-            const option = document.createElement('option');
-            option.value = motor.id;
-            option.textContent = `${motor.name} - ${getMotorClassLabel(motor)} class, ${(motor.averageThrust * PHYSICS_CONSTANTS.NEWTONS_TO_OUNCES).toFixed(0)}oz thrust`;
-            motorSelect.appendChild(option);
-        });
-    } else {
-        console.error('❌ No motors data found!');
-    }
+    console.log('⚡ Populating', data.motors.length, 'motors');
+    data.motors.forEach(motor => {
+        const option = document.createElement('option');
+        option.value = motor.id;
+        option.textContent = `${motor.name} - ${getMotorClassLabel(motor)} class, ${(motor.averageThrust * PHYSICS_CONSTANTS.NEWTONS_TO_OUNCES).toFixed(0)}oz thrust`;
+        motorSelect.appendChild(option);
+    });
     
     // Populate parachutes
-    if (data && data.parachutes && Array.isArray(data.parachutes)) {
-        console.log('🪂 Populating', data.parachutes.length, 'parachutes');
-        data.parachutes.forEach(parachute => {
-            const option = document.createElement('option');
-            option.value = parachute.id;
-            option.textContent = `${parachute.name} - ${parachute.diameter}cm ${parachute.type}`;
-            parachuteSelect.appendChild(option);
-        });
-    } else {
-        console.error('❌ No parachutes data found!');
-    }
+    console.log('🪂 Populating', data.parachutes.length, 'parachutes');
+    data.parachutes.forEach(parachute => {
+        const option = document.createElement('option');
+        option.value = parachute.id;
+        option.textContent = `${parachute.name} - ${parachute.diameter}cm ${parachute.type}`;
+        parachuteSelect.appendChild(option);
+    });
     
     // Add change listeners
     rocketSelect.addEventListener('change', function() {
@@ -245,16 +240,26 @@ function validateConfiguration(config) {
     return { valid: true, warnings };
 }
 
-// Module exports
-const RocketBuilder = {
-    initializeBuilder,
-    updateComponentDetails,
-    getRocketConfiguration,
-    getLaunchConditions,
-    validateConfiguration,
-    getMotorClassLabel
-};
+// Export to global window object for browser use
+if (typeof window !== 'undefined') {
+    window.RocketBuilder = {
+        initializeBuilder,
+        updateComponentDetails,
+        getRocketConfiguration,
+        getLaunchConditions,
+        validateConfiguration,
+        getMotorClassLabel
+    };
+}
 
+// Also export for Node.js/module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = RocketBuilder;
+    module.exports = window.RocketBuilder || {
+        initializeBuilder,
+        updateComponentDetails,
+        getRocketConfiguration,
+        getLaunchConditions,
+        validateConfiguration,
+        getMotorClassLabel
+    };
 }
