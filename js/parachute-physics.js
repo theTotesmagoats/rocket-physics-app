@@ -79,7 +79,7 @@ function getParachuteExplanation(massKg, parachute, terminalVelocity, area, cd) 
     
     return `
         Parachute ${parachute.name} (${parachute.diameter}cm ${parachute.type}):\n\n
-        • Terminal velocity: ${terminalVelocity.toFixed(1)} m/s (${(terminalVelocity * 3.6).toFixed(1)} km/h)\n
+        • Terminal velocity: ${terminalVelocity.toFixed(1)} m/s (${(terminalVelocity * 3.6).toFixed(1)} km/h)\n\n
           This is your descent rate - how fast you fall with chute deployed.\n\n
         • Descent time: ${descentTimePer100m.toFixed(1)} seconds per 100 meters\n\n
         • Effective area: ${area.toFixed(2)} m²\n\n
@@ -139,17 +139,28 @@ function simulateParachuteDeployment(state, parachute) {
     };
 }
 
-// Module exports
-const ParachutePhysics = {
-    shouldDeployParachute,
-    calculateParachuteArea,
-    getParachuteDragCoefficient,
-    calculateParachuteTerminalVelocity,
-    checkParachuteSuitability,
-    simulateParachuteDeployment,
-    getParachuteExplanation
-};
+// Export to global window object for browser use
+if (typeof window !== 'undefined') {
+    window.ParachutePhysics = {
+        shouldDeployParachute,
+        calculateParachuteArea,
+        getParachuteDragCoefficient,
+        calculateParachuteTerminalVelocity,
+        checkParachuteSuitability,
+        simulateParachuteDeployment,
+        getParachuteExplanation
+    };
+}
 
+// Also export for Node.js/module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = ParachutePhysics;
+    module.exports = window.ParachutePhysics || {
+        shouldDeployParachute,
+        calculateParachuteArea,
+        getParachuteDragCoefficient,
+        calculateParachuteTerminalVelocity,
+        checkParachuteSuitability,
+        simulateParachuteDeployment,
+        getParachuteExplanation
+    };
 }
