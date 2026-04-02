@@ -48,7 +48,9 @@ function getAirDensityAtAltitude(altitudeMeters) {
     const T = T0 + PHYSICS_CONSTANTS.TEMPERATURE_LAPSE_RATE * altitudeMeters;
     
     // Pressure at altitude (barometric formula)
-    const P = P0 * Math.pow(1 - (L * altitudeMeters) / T0, (PHYSICS_CONSTANTS.GRAVITY * R) / L);
+    // FIX: Exponent should be G / (R * L), not (G * R) / L
+    const exponent = PHYSICS_CONSTANTS.GRAVITY / (R * L);
+    const P = P0 * Math.pow(1 - (L * altitudeMeters) / T0, exponent);
     
     // Density from ideal gas law: ρ = P / (R × T)
     const density = P / (R * Math.max(T, 200));  // Floor at 200K to avoid division issues
