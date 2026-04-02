@@ -19,13 +19,17 @@ async function initializeApp() {
     // Load component data (with robust fallback)
     await loadComponentData();
     
-    // Verify we have data
-    if (!window.ROCKET_DATA || !window.ROCKET_DATA.rockets) {
-        console.error('❌ No rocket data available! Using emergency fallback.');
+    // Verify we have data with correct shape
+    if (!window.ROCKET_DATA || !Array.isArray(window.ROCKET_DATA.rockets)) {
+        console.error('❌ Invalid rocket data structure! Using emergency fallback.');
         window.ROCKET_DATA = getFallbackData();
     }
     
-    console.log('📦 Data loaded:', window.ROCKET_DATA);
+    console.log('📦 Data loaded:', {
+        rockets: window.ROCKET_DATA.rockets?.length,
+        motors: window.ROCKET_DATA.motors?.length,
+        parachutes: window.ROCKET_DATA.parachutes?.length
+    });
     
     // Initialize builder UI
     try {
@@ -74,12 +78,22 @@ async function loadComponentData() {
         ]);
         
         if (rocketsRes.ok && motorsRes.ok && parachutesRes.ok) {
-            const rockets = await rocketsRes.json();
-            const motors = await motorsRes.json();
-            const parachutes = await parachutesRes.json();
+            const rocketsData = await rocketsRes.json();
+            const motorsData = await motorsRes.json();
+            const parachutesData = await parachutesRes.json();
             
-            window.ROCKET_DATA = { rockets, motors, parachutes };
-            console.log('📦 Loaded external data:', rockets.length, 'rockets,', motors.length, 'motors,', parachutes.length, 'parachutes');
+            // UNWRAP the JSON - each file is { "rockets": [...] }, not just [...]
+            window.ROCKET_DATA = {
+                rockets: rocketsData.rockets ?? rocketsData,
+                motors: motorsData.motors ?? motorsData,
+                parachutes: parachutesData.parachutes ?? parachutesData
+            };
+            
+            console.log('📦 Loaded external data:', {
+                rockets: window.ROCKET_DATA.rockets.length,
+                motors: window.ROCKET_DATA.motors.length,
+                parachutes: window.ROCKET_DATA.parachutes.length
+            });
         } else {
             console.log('⚠️ External files not available, using fallback data');
         }
