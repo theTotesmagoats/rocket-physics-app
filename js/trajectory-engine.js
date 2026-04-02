@@ -8,16 +8,29 @@
  * Returns trajectory data point by point for visualization and analysis.
  */
 function simulateFlight(rocketConfig, launchConditions) {
+    console.log('🚀 SIMULATION START - Config:', rocketConfig);
+    console.log('Weather:', launchConditions);
+    
     // Initialize state
     const initialState = createInitialState(rocketConfig, launchConditions);
+    console.log('Initial State:', initialState);
     
     const trajectory = [];
     let state = { ...initialState };
     let previousPhase = FlightPhase.LAUNCH;
     const phaseTransitions = [];
     
+    let iterationCount = 0;
+    const maxIterations = 100; // Log first 100 iterations for debugging
+    
     // Main simulation loop
     while (state.time < APP_CONFIG.MAX_SIMULATION_TIME && !state.landed) {
+        iterationCount++;
+        
+        if (iterationCount <= maxIterations || iterationCount % 50 === 0) {
+            console.log(`Iter ${iterationCount}: t=${state.time.toFixed(3)}s, alt=${state.altitude.toFixed(2)}m, vel=${state.velocity.toFixed(3)}m/s`);
+        }
+        
         // Record current state
         trajectory.push(recordState(state));
         
@@ -57,6 +70,7 @@ function simulateFlight(rocketConfig, launchConditions) {
         
         // Check for landing (only if not on launch rod)
         if (!state.onLaunchRod && state.altitude <= 0) {
+            console.log('LANDING DETECTED at t=' + state.time.toFixed(2) + 's');
             state.altitude = 0;
             state.velocity = 0;
             state.landed = true;
@@ -65,10 +79,19 @@ function simulateFlight(rocketConfig, launchConditions) {
         }
         
         state.time += deltaTime;
+        
+        // Safety: stop if simulation runs too long (debugging)
+        if (iterationCount > 10000) {
+            console.warn('SIMULATION STUCK - stopping at ' + iterationCount + ' iterations');
+            break;
+        }
     }
+    
+    console.log('SIMULATION END - trajectory length:', trajectory.length);
     
     // Calculate summary statistics
     const stats = calculateFlightStatistics(trajectory, phaseTransitions, rocketConfig);
+    console.log('Final Statistics:', stats);
     
     return {
         trajectory,
@@ -87,6 +110,8 @@ function createInitialState(rocketConfig, launchConditions) {
                        rocketConfig.motor.emptyMass + 
                        (rocketConfig.parachute ? rocketConfig.parachute.mass : 0) +
                        rocketConfig.payloadMass;
+    
+    console.log('Total Mass:', (rocketMass * 1000).toFixed(2), 'g');
     
     return {
         time: 0,
@@ -154,13 +179,17 @@ function updateState(state, rocketConfig, launchConditions, deltaTime) {
     const accelResult = ThrustModule.calculateAcceleration(thrust, dragForce, state.mass);
     let acceleration = accelResult.value;
     
+    console.log(`Forces: thrust=${thrust.toFixed(2)}N, drag=${dragForce.toFixed(4)}N, weight=${state.mass * PHYSICS_CONSTANTS.GRAVITY}N → acc=${acceleration.toFixed(2)}m/s²`);
+    
     // Constrain velocity during launch rod phase - rocket cannot fall down the rod
     if (state.onLaunchRod && acceleration < 0) {
+        console.log('Constraining negative acceleration on launch rod');
         acceleration = 0;  // Prevent falling while on rod
     }
     
     // Check launch rod exit
     if (state.onLaunchRod && Math.abs(state.velocity) >= state.launchRodExitSpeed) {
+        console.log('LAUNCH ROD EXIT at t=' + state.time.toFixed(2) + 's');
         state.onLaunchRod = false;
     }
     
@@ -171,6 +200,7 @@ function updateState(state, rocketConfig, launchConditions, deltaTime) {
     
     // Detect apogee
     if (!state.maxAltitudeReached && state.velocity <= 0 && state.altitude > 1) {
+        console.log('APEX REACHED at t=' + state.time.toFixed(2) + 's, alt=' + state.altitude.toFixed(2) + 'm');
         state.maxAltitudeReached = true;
     }
     
