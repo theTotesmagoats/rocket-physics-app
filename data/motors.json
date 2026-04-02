@@ -1,0 +1,103 @@
+{
+  "motors": [
+    {
+      "id": "estes_a4_2",
+      "name": "Estes A4-2",
+      "averageThrust": 3.5,
+      "burnTime": 0.6,
+      "totalMass": 0.014,
+      "emptyMass": 0.009,
+      "propellantMass": 0.005,
+      "delayTime": 2.0,
+      "description": "Entry-level motor, gentle acceleration"
+    },
+    {
+      "id": "estes_a8_3",
+      "name": "Estes A8-3",
+      "averageThrust": 4.6,
+      "burnTime": 0.75,
+      "totalMass": 0.019,
+      "emptyMass": 0.012,
+      "propellantMass": 0.007,
+      "delayTime": 3.0,
+      "description": "Popular A-class motor, good for beginners"
+    },
+    {
+      "id": "estes_b4_4",
+      "name": "Estes B4-4",
+      "averageThrust": 6.7,
+      "burnTime": 1.25,
+      "totalMass": 0.031,
+      "emptyMass": 0.018,
+      "propellantMass": 0.013,
+      "delayTime": 4.0,
+      "description": "Classic B-class, longer burn for higher altitude"
+    },
+    {
+      "id": "estes_b6_4",
+      "name": "Estes B6-4",
+      "averageThrust": 8.2,
+      "burnTime": 1.0,
+      "totalMass": 0.035,
+      "emptyMass": 0.020,
+      "propellantMass": 0.015,
+      "delayTime": 4.0,
+      "description": "Higher thrust B-class for heavier rockets"
+    },
+    {
+      "id": "estes_c6_5",
+      "name": "Estes C6-5",
+      "averageThrust": 7.4,
+      "burnTime": 2.0,
+      "totalMass": 0.048,
+      "emptyMass": 0.025,
+      "propellantMass": 0.023,
+      "delayTime": 5.0,
+      "description": "Long-burn C-class, excellent altitude potential"
+    },
+    {
+      "id": "estes_c9_7",
+      "name": "Estes C9-7",
+      "averageThrust": 12.3,
+      "burnTime": 1.45,
+      "totalMass": 0.068,
+      "emptyMass": 0.035,
+      "propellantMass": 0.033,
+      "delayTime": 7.0,
+      "description": "High-thrust C-class for medium rockets"
+    },
+    {
+      "id": "estes_d12_5",
+      "name": "Estes D12-5",
+      "averageThrust": 16.8,
+      "burnTime": 1.75,
+      "totalMass": 0.105,
+      "emptyMass": 0.050,
+      "propellantMass": 0.055,
+      "delayTime": 5.0,
+      "description": "Powerful D-class for high altitude flights"
+    },
+    {
+      "id": "estes_e9_4",
+      "name": "Estes E9-4",
+      "averageThrust": 18.5,
+      "burnTime": 2.3,
+      "totalMass": 0.165,
+      "emptyMass": 0.075,
+      "propellantMass": 0.090,
+      "delayTime": 4.0,
+      "description": "Long-burn E-class, serious altitude motor"
+    },
+    {
+      "id": "aerotech_e28_5",
+      "name": "Aerotech E28-5",
+      "averageThrust": 28.0,
+      "burnTime": 1.6,
+      "totalMass": 0.140,
+      "emptyMass": 0.060,
+      "propellantMass": 0.080,
+      "delayTime": 5.0,
+      "description": "High-performance composite motor"
+    }
+  ]
+}
