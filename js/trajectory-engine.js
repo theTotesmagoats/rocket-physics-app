@@ -22,10 +22,10 @@ function simulateFlight(rocketConfig, launchConditions) {
         trajectory.push(recordState(state));
         
         // Get current phase
-        const currentPhase = getCurrentPhase(state);
+        const currentPhase = FlightPhases.getCurrentPhase(state);
         
         // Check for phase transition
-        const transition = detectPhaseTransition(previousPhase, currentPhase);
+        const transition = FlightPhases.detectPhaseTransition(previousPhase, currentPhase);
         if (transition) {
             phaseTransitions.push({
                 time: state.time,
@@ -37,8 +37,8 @@ function simulateFlight(rocketConfig, launchConditions) {
         
         // Check for parachute deployment
         if (!state.parachuteDeployed && rocketConfig.parachute) {
-            if (shouldDeployParachute(state, rocketConfig.parachute)) {
-                const deployment = simulateParachuteDeployment(state, rocketConfig.parachute);
+            if (ParachutePhysics.shouldDeployParachute(state, rocketConfig.parachute)) {
+                const deployment = ParachutePhysics.simulateParachuteDeployment(state, rocketConfig.parachute);
                 state.velocity = deployment.velocity;
                 state.parachuteDeployed = true;
                 phaseTransitions.push({
@@ -115,13 +115,13 @@ function updateState(state, rocketConfig, launchConditions, deltaTime) {
     // Calculate cross-sectional area
     const isDescent = state.velocity < 0 && state.parachuteDeployed;
     const area = isDescent 
-        ? calculateParachuteArea(rocketConfig.parachute.diameter)
+        ? ParachutePhysics.calculateParachuteArea(rocketConfig.parachute.diameter)
         : DragModule.calculateCrossSectionalArea(rocketConfig.rocket.diameter * PHYSICS_CONSTANTS.CM_TO_METERS);
     
     // Get drag coefficient
     let cd;
     if (isDescent) {
-        cd = getParachuteDragCoefficient(rocketConfig.parachute.type);
+        cd = ParachutePhysics.getParachuteDragCoefficient(rocketConfig.parachute.type);
     } else if (state.velocity < 0 && !state.parachuteDeployed) {
         cd = DragModule.getDragCoefficient('rocket_blunt_nose');  // Falling nose-first
     } else {
@@ -179,7 +179,7 @@ function updateState(state, rocketConfig, launchConditions, deltaTime) {
         launchConditions.windDirection
     );
     
-    const currentPhase = getCurrentPhase(state);
+    const currentPhase = FlightPhases.getCurrentPhase(state);
     const drift = WindModel.calculateHorizontalDrift(
         windComponents.vx, windComponents.vy, deltaTime, currentPhase, state.parachuteDeployed
     );
@@ -199,7 +199,7 @@ function recordState(state) {
         horizontalX: state.horizontalX,
         horizontalY: state.horizontalY,
         mass: state.mass,
-        phase: getCurrentPhase(state)
+        phase: FlightPhases.getCurrentPhase(state)
     };
 }
 
@@ -268,15 +268,24 @@ function generateTeachingContent(stats, phaseTransitions, rocketConfig) {
     return content;
 }
 
-// Module exports
-const TrajectoryEngine = {
-    simulateFlight,
-    createInitialState,
-    updateState,
-    calculateFlightStatistics,
-    generateTeachingContent
-};
+// Export to global window object for browser use
+if (typeof window !== 'undefined') {
+    window.TrajectoryEngine = {
+        simulateFlight,
+        createInitialState,
+        updateState,
+        calculateFlightStatistics,
+        generateTeachingContent
+    };
+}
 
+// Also export for Node.js/module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = TrajectoryEngine;
+    module.exports = window.TrajectoryEngine || {
+        simulateFlight,
+        createInitialState,
+        updateState,
+        calculateFlightStatistics,
+        generateTeachingContent
+    };
 }
