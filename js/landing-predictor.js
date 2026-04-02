@@ -189,16 +189,26 @@ function getRecoveryRecommendations(prediction, launchConditions) {
     return recommendations;
 }
 
-// Module exports
-const LandingPredictor = {
-    predictLanding,
-    estimatePeakAltitude,
-    calculateDescentParameters,
-    calculateLandingPosition,
-    getRecoveryRecommendations,
-    generatePredictionExplanation
-};
+// Export to global window object for browser use
+if (typeof window !== 'undefined') {
+    window.LandingPredictor = {
+        predictLanding,
+        estimatePeakAltitude,
+        calculateDescentParameters,
+        calculateLandingPosition,
+        getRecoveryRecommendations,
+        generatePredictionExplanation
+    };
+}
 
+// Also export for Node.js/module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = LandingPredictor;
+    module.exports = window.LandingPredictor || {
+        predictLanding,
+        estimatePeakAltitude,
+        calculateDescentParameters,
+        calculateLandingPosition,
+        getRecoveryRecommendations,
+        generatePredictionExplanation
+    };
 }
