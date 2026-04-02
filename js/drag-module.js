@@ -126,15 +126,24 @@ function calculateTerminalVelocity(massKg, crossSectionalArea, dragCoefficient, 
     };
 }
 
-// Module exports
-const DragModule = {
-    calculateDrag,
-    calculateCrossSectionalArea,
-    getDragCoefficient,
-    calculateTerminalVelocity,
-    getDragExplanation
-};
+// Export to global window object for browser use
+if (typeof window !== 'undefined') {
+    window.DragModule = {
+        calculateDrag,
+        calculateCrossSectionalArea,
+        getDragCoefficient,
+        calculateTerminalVelocity,
+        getDragExplanation
+    };
+}
 
+// Also export for Node.js/module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = DragModule;
+    module.exports = window.DragModule || {
+        calculateDrag,
+        calculateCrossSectionalArea,
+        getDragCoefficient,
+        calculateTerminalVelocity,
+        getDragExplanation
+    };
 }
