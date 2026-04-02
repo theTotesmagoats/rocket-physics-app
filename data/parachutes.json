@@ -1,0 +1,60 @@
+{
+  "parachutes": [
+    {
+      "id": "streamer_small",
+      "name": "6\" Streamer",
+      "diameter": 15,
+      "type": "streamer",
+      "mass": 0.002,
+      "description": "Fast descent, minimal wind drift - for short flights"
+    },
+    {
+      "id": "para_6_round",
+      "name": "6\" Round Parachute",
+      "diameter": 15,
+      "type": "round",
+      "mass": 0.003,
+      "description": "Small parachute for light rockets"
+    },
+    {
+      "id": "para_12_round",
+      "name": "12\" Round Parachute",
+      "diameter": 30,
+      "type": "round",
+      "mass": 0.008,
+      "description": "Standard size for most hobby rockets"
+    },
+    {
+      "id": "para_18_round",
+      "name": "18\" Round Parachute",
+      "diameter": 46,
+      "type": "round",
+      "mass": 0.015,
+      "description": "Large parachute for slow, gentle landings"
+    },
+    {
+      "id": "para_24_round",
+      "name": "24\" Round Parachute",
+      "diameter": 61,
+      "type": "round",
+      "mass": 0.025,
+      "description": "Extra large for heavy rockets or maximum recovery safety"
+    },
+    {
+      "id": "para_18_hex",
+      "name": "18\" Hexagonal Parachute",
+      "diameter": 46,
+      "type": "hexagonal",
+      "mass": 0.017,
+      "description": "Hexagonal shape for more stable descent"
+    },
+    {
+      "id": "parafoil_12",
+      "name": "12\" Parafoil",
+      "diameter": 30,
+      "type": "elliptical",
+      "mass": 0.012,
+      "description": "Gliding parachute - lands with precision but complex"
+    }
+  ]
+}
