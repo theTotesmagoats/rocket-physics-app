@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocket Physics Simulator - Learn by Doing</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>🚀 Rocket Physics Simulator</h1>
+        <p class="subtitle">Build your rocket. Launch it. Learn why it lands where it does.</p>
+    </header>
+
+    <main>
+        <!-- Rocket Builder Section -->
+        <section id="rocket-builder">
+            <h2>🔧 Build Your Rocket</h2>
+            
+            <div class="builder-grid">
+                <!-- Rocket Body Selection -->
+                <div class="builder-panel">
+                    <h3>Rocket Body</h3>
+                    <label for="rocket-select">Choose a rocket:</label>
+                    <select id="rocket-select"></select>
+                    <div id="rocket-details" class="component-details"></div>
+                </div>
+
+                <!-- Motor Selection -->
+                <div class="builder-panel">
+                    <h3>Engine</h3>
+                    <label for="motor-select">Choose a motor:</label>
+                    <select id="motor-select"></select>
+                    <div id="motor-details" class="component-details"></div>
+                </div>
+
+                <!-- Parachute Selection -->
+                <div class="builder-panel">
+                    <h3>Parachute</h3>
+                    <label for="parachute-select">Choose a parachute:</label>
+                    <select id="parachute-select"></select>
+                    <div id="parachute-details" class="component-details"></div>
+                </div>
+            </div>
+
+            <!-- Additional Payload Weight -->
+            <div class="builder-panel full-width">
+                <h3>Payload</h3>
+                <label for="payload-weight">Additional payload weight (grams):</label>
+                <input type="number" id="payload-weight" min="0" max="1000" value="0" step="1">
+            </div>
+        </section>
+
+        <!-- Launch Conditions Section -->
+        <section id="launch-conditions">
+            <h2>🌤️ Launch Conditions</h2>
+            
+            <div class="conditions-grid">
+                <div class="condition-panel">
+                    <label for="wind-speed">Wind Speed (mph):</label>
+                    <input type="number" id="wind-speed" min="0" max="100" value="5" step="0.5">
+                    <small>Feynman's note: Wind matters most during parachute descent, not ascent.</small>
+                </div>
+
+                <div class="condition-panel">
+                    <label for="wind-direction">Wind Direction (degrees):</label>
+                    <input type="number" id="wind-direction" min="0" max="360" value="90" step="15">
+                    <small>0° = North, 90° = East, 180° = South, 270° = West</small>
+                </div>
+
+                <div class="condition-panel">
+                    <label for="altitude">Launch Altitude (feet):</label>
+                    <input type="number" id="altitude" min="0" max="15000" value="0" step="10">
+                    <small>Affects air density and drag</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <section id="actions">
+            <button id="simulate-btn" class="primary-button">🎯 Simulate Launch</button>
+            <button id="reset-btn">🔄 Reset All</button>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results" style="display: none;">
+            <h2>📊 Flight Results</h2>
+            
+            <div class="results-grid">
+                <!-- Key Metrics -->
+                <div class="metrics-panel">
+                    <h3>Flight Statistics</h3>
+                    <div id="flight-stats"></div>
+                </div>
+
+                <!-- Teaching Panel -->
+                <div class="teaching-panel">
+                    <h3>📚 What's Happening (Feynman Style)</h3>
+                    <div id="teaching-content"></div>
+                </div>
+            </div>
+
+            <!-- Visualization -->
+            <div class="visualization-container">
+                <canvas id="flight-canvas" width="800" height="500"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Built for learning. Each module is isolated - break one thing, fix one thing.</p>
+    </footer>
+
+    <!-- Load modules in dependency order -->
+    <script src="js/config.js"></script>
+    <script src="js/physics-constants.js"></script>
+    <script src="js/drag-module.js"></script>
+    <script src="js/thrust-module.js"></script>
+    <script src="js/flight-phases.js"></script>
+    <script src="js/wind-model.js"></script>
+    <script src="js/parachute-physics.js"></script>
+    <script src="js/trajectory-engine.js"></script>
+    <script src="js/landing-predictor.js"></script>
+    <script src="js/rocket-builder.js"></script>
+    <script src="js/visualizer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
