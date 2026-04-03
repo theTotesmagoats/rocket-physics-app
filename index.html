@@ -5,6 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rocket Physics Simulator - Learn by Doing</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Interactive Equation Display Styles */
+        .equation-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .equation-panel h3 {
+            margin-top: 0;
+            color: #ffd700;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 8px;
+        }
+        
+        .equation-display {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .equation-step {
+            background-color: rgba(255, 255, 255, 0.08);
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        .equation-step.highlight {
+            background-color: rgba(255, 215, 0, 0.2);
+            border-left: 3px solid #ffd700;
+        }
+        
+        .variable-definition {
+            font-size: 0.8em;
+            color: #e0e0e0;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -87,10 +133,40 @@
             <h2>📊 Flight Results</h2>
             
             <div class="results-grid">
-                <!-- Key Metrics -->
+                <!-- Key Metrics with Interactive Equations -->
                 <div class="metrics-panel">
                     <h3>Flight Statistics</h3>
-                    <div id="flight-stats"></div>
+                    <div id="flight-stats">
+                        <div class="stat-box" data-stat="peak-altitude" onclick="showEquation('peak-altitude')">
+                            <h4>🏔️ Peak Altitude</h4>
+                            <span id="peak-altitude-value">-- ft</span>
+                            <small>Click to see the equation</small>
+                        </div>
+                        
+                        <div class="stat-box" data-stat="flight-time" onclick="showEquation('flight-time')">
+                            <h4>⏱️ Total Flight Time</h4>
+                            <span id="total-flight-time-value">-- s</span>
+                            <small>Click to see the equation</small>
+                        </div>
+                        
+                        <div class="stat-box" data-stat="max-velocity" onclick="showEquation('max-velocity')">
+                            <h4>⚡ Max Velocity</h4>
+                            <span id="max-velocity-value">-- m/s</span>
+                            <small>Click to see the equation</small>
+                        </div>
+                        
+                        <div class="stat-box" data-stat="downrange" onclick="showEquation('downrange')">
+                            <h4>🧭 Downrange Distance</h4>
+                            <span id="downrange-value">-- ft</span>
+                            <small>Click to see the equation</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Equation Display Area -->
+                    <div id="equation-display" class="equation-panel" style="display: none;">
+                        <h3 id="equation-title">Equation</h3>
+                        <div id="equation-content"></div>
+                    </div>
                 </div>
 
                 <!-- Teaching Panel -->
