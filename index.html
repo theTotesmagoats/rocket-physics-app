@@ -163,34 +163,10 @@
             <h2>📊 Flight Statistics</h2>
             
             <div class="statistics-grid">
-                <!-- Key Metrics with Interactive Equations -->
+                <!-- Key Metrics with Interactive Equations (dynamically generated) -->
                 <div class="metrics-panel">
                     <h3>Key Metrics</h3>
-                    <div id="flight-stats">
-                        <div class="stat-box" data-stat="peak-altitude" onclick="showEquation('peak-altitude')">
-                            <h4>🏔️ Peak Altitude</h4>
-                            <span id="peak-altitude-value">-- ft</span>
-                            <small>Click to see the equation</small>
-                        </div>
-                        
-                        <div class="stat-box" data-stat="flight-time" onclick="showEquation('flight-time')">
-                            <h4>⏱️ Total Flight Time</h4>
-                            <span id="total-flight-time-value">-- s</span>
-                            <small>Click to see the equation</small>
-                        </div>
-                        
-                        <div class="stat-box" data-stat="max-velocity" onclick="showEquation('max-velocity')">
-                            <h4>⚡ Max Velocity</h4>
-                            <span id="max-velocity-value">-- m/s</span>
-                            <small>Click to see the equation</small>
-                        </div>
-                        
-                        <div class="stat-box" data-stat="downrange" onclick="showEquation('downrange')">
-                            <h4>🧭 Downrange Distance</h4>
-                            <span id="downrange-value">-- ft</span>
-                            <small>Click to see the equation</small>
-                        </div>
-                    </div>
+                    <div id="flight-stats"></div>
                     
                     <!-- Event Timeline -->
                     <div class="event-timeline">
