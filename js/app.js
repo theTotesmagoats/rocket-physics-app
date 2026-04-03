@@ -174,7 +174,7 @@ async function handleSimulate() {
     // Validate configuration
     const validation = RocketBuilder.validateConfiguration(config);
     if (!validation.valid) {
-        alert(validation.errors.join('\n'));
+        alert(validation.errors?.join('\n') || 'Validation failed');
         return;
     }
     
@@ -195,10 +195,10 @@ async function handleSimulate() {
             enabled: true,
             speed: launchConditions.windSpeed,
             direction: launchConditions.windDirection,
-            drift: result.statistics.windDrift?.feet || 0,
+            drift: result.statistics?.windDrift?.feet || 0,
             uncertainty: WindModel.calculateWindUncertainty(
                 launchConditions.windSpeed,
-                result.statistics.descentTime
+                result.statistics?.descentTime || 10
             )
         };
         
@@ -223,8 +223,8 @@ function displayResults(result, windData = null) {
     // Show results section
     resultsSection.style.display = 'block';
     
-    // Display statistics (including interactive equation boxes)
-    displayStatisticsWithEquations(result.statistics);
+    // Display statistics with interactive equation boxes
+    displayStatisticsWithEquations(result.statistics, result.trajectory);
     
     // Display flight events in the UI
     Visualizer.displayFlightEvents(result.trajectory, windData);
@@ -234,10 +234,14 @@ function displayResults(result, windData = null) {
     
     // Draw visualization with full trajectory
     if (visualizer) {
+        visualizer.simulationResult = result;
+        visualizer.windData = windData;
+        visualizer.scale = 0.1; // Default scale
+        
         Visualizer.drawFlightVisualization(visualizer, result, 1.0, windData);
         
         // Initialize animation system
-        visualizer.totalTime = result.statistics.totalFlightTime || 60;
+        visualizer.totalTime = result.statistics?.totalFlightTime || 60;
     }
     
     // Scroll to results
@@ -247,17 +251,60 @@ function displayResults(result, windData = null) {
 /**
  * Display statistics with interactive equation boxes.
  */
-function displayStatisticsWithEquations(stats) {
-    const peakAltitude = stats.peakAltitudeFeet || 0;
-    const totalTime = stats.totalFlightTime || 0;
-    const maxVelocity = stats.maxVelocity || 0;
-    const downrange = stats.downrangeFeet || 0;
+function displayStatisticsWithEquations(stats, trajectory) {
+    const peakAltitude = stats?.peakAltitudeFeet || 0;
+    const totalTime = stats?.totalFlightTime || 0;
+    const maxVelocity = stats?.maxVelocity || 0;
+    const downrange = stats?.downrangeFeet || 0;
+    
+    // Create interactive stat boxes dynamically
+    const statsHtml = `
+        <div class="stat-box" data-stat="peak-altitude">
+            <h4>🏔️ Peak Altitude</h4>
+            <span>${peakAltitude.toFixed(0)} ft</span>
+            <small>Click to see the equation</small>
+        </div>
+        
+        <div class="stat-box" data-stat="flight-time">
+            <h4>⏱️ Total Flight Time</h4>
+            <span>${totalTime.toFixed(1)} s</span>
+            <small>Click to see the equation</small>
+        </div>
+        
+        <div class="stat-box" data-stat="max-velocity">
+            <h4>⚡ Max Velocity</h4>
+            <span>${maxVelocity.toFixed(1)} m/s (${(maxVelocity * 2.237).toFixed(0)} mph)</span>
+            <small>Click to see the equation</small>
+        </div>
+        
+        <div class="stat-box" data-stat="downrange">
+            <h4>🧭 Downrange Distance</h4>
+            <span>${downrange.toFixed(0)} ft</span>
+            <small>Click to see the equation</small>
+        </div>
+    `;
     
     // Update the statistics display
-    document.getElementById('peak-altitude-value').textContent = `${peakAltitude.toFixed(0)} ft`;
-    document.getElementById('total-flight-time-value').textContent = `${totalTime.toFixed(1)} s`;
-    document.getElementById('max-velocity-value').textContent = `${maxVelocity.toFixed(1)} m/s (${(maxVelocity * 2.237).toFixed(0)} mph)`;
-    document.getElementById('downrange-value').textContent = `${downrange.toFixed(0)} ft`;
+    const flightStats = document.getElementById('flight-stats');
+    if (flightStats) {
+        flightStats.innerHTML = statsHtml;
+        
+        // Add click handlers for equations
+        flightStats.querySelectorAll('.stat-box').forEach(box => {
+            box.addEventListener('click', function(event) {
+                event.stopPropagation(); // Prevent bubbling
+                const statType = this.dataset.stat;
+                showEquation(statType);
+            });
+        });
+    }
+    
+    // Update specific value displays if they exist
+    document.getElementById('peak-altitude-value')?.textContent?.replaceWith(`${peakAltitude.toFixed(0)} ft`);
+    document.getElementById('total-flight-time-value')?.textContent?.replaceWith(`${totalTime.toFixed(1)} s`);
+    const maxVelocityMph = (maxVelocity * 2.237).toFixed(0);
+    document.getElementById('max-velocity-value')?.textContent?.replaceWith(`${maxVelocity.toFixed(1)} m/s (${maxVelocityMph} mph)`);
+    document.getElementById('downrange-value')?.textContent?.replaceWith(`${downrange.toFixed(0)} ft`);
 }
 
 /**
@@ -287,6 +334,10 @@ function handleReset() {
     if (visualizer) {
         Visualizer.resetPlayback(visualizer);
         Visualizer.drawBackground(visualizer);
+        
+        // Clear stored simulation result
+        visualizer.simulationResult = null;
+        visualizer.windData = null;
     }
 }
 
@@ -304,7 +355,7 @@ function showEquation(statType) {
     });
     
     // Highlight the clicked stat box
-    const clickedBox = event.currentTarget;
+    const clickedBox = event.currentTarget || event.target.closest('.stat-box');
     if (clickedBox) {
         clickedBox.style.border = '2px solid #3498db';
         clickedBox.style.boxShadow = '0 0 15px rgba(52, 152, 219, 0.6)';
