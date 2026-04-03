@@ -1,27 +1,25 @@
-# Rocket Physics Simulator Changelog
+# Changelog
+
+All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Fixed - 2026-04-03
+### Fixed
 
-#### Physics Engine Fixes
-- **Drag Direction**: Use signed drag force during integration instead of magnitude-only. Descent now feels more natural with proper terminal velocity and longer hang time.
-- **Wind Direction Mapping**: Fixed conversion for "wind comes FROM" convention. A 0° wind (from North) now correctly blows south; a 90° wind (from East) blows west.
-- **Atmosphere Density Exponent**: Corrected barometric exponent from `(G * R) / L` to `G / (R * L)` for accurate air density vs altitude.
-- **Initial Mass Tracking**: Now starts with `motor.totalMass` instead of `emptyMass`, ensuring propellant mass is included at launch.
+- **Mass Calculation Inconsistency**: Fixed critical bug where `createInitialState()` used `rocketConfig.motor.totalMass` instead of `propellantMass` for propellant calculations. This has been corrected to use `rocketConfig.motor.propellantMass` consistently throughout the simulation.
+- Added `propellantMass` field to state object for reliable reference during burn calculations
+- Updated mass calculation in `updateState()` to use consistent propellant mass reference
 
-#### Impact
-These fixes significantly improve flight realism:
-- Descent duration and terminal velocity now match real-world expectations
-- Wind drift magnitude increases (especially in long descent phases)
-- Drift direction correctly matches compass heading (e.g., 0° → southward, 90° → westward)
+### Improved
 
----
+- **Physics Documentation**: Enhanced comments in drag-module.js to clarify the mathematical formulation of drag calculations
+- **Mathematical Verification**: Updated README with detailed documentation of physics equations and references to MIT Unified Engineering notes for verification
+- Added comprehensive physics foundation section documenting core equations, numerical integration methods, and module organization
 
-## [1.0.0] - 2026-04-02
+## [1.0.0] - Initial Release
 
-Initial release with modular physics modules:
-- Trajectory engine with phase detection
-- Wind model with altitude scaling
-- Parachute physics with deployment logic
-- Drag and thrust modeling
+- Implemented complete rocket trajectory simulation
+- Added drag, thrust, gravity, and parachute physics modules
+- Created interactive UI for rocket configuration and launch simulation
+- Added educational explanations using Feynman-style commentary
+- Included wind model for horizontal drift calculations
