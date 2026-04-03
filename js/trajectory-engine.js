@@ -105,9 +105,11 @@ function simulateFlight(rocketConfig, launchConditions) {
  * Create initial simulation state.
  */
 function createInitialState(rocketConfig, launchConditions) {
-    // Calculate total mass
+    // FIX: Start with motor.totalMass (propellant included), not emptyMass
+    const totalPropMass = rocketConfig.motor.totalMass;
+    
     const rocketMass = rocketConfig.rocket.mass + 
-                       rocketConfig.motor.emptyMass + 
+                       totalPropMass + 
                        (rocketConfig.parachute ? rocketConfig.parachute.mass : 0) +
                        rocketConfig.payloadMass;
     
@@ -153,33 +155,45 @@ function updateState(state, rocketConfig, launchConditions, deltaTime) {
         cd = DragModule.getDragCoefficient('rocket_with_fins');
     }
     
-    // Calculate drag force
-    const dragResult = DragModule.calculateDrag(Math.abs(state.velocity), area, cd, airDensity);
-    const dragForce = dragResult.value;
+    // FIX: Use signed drag magnitude based on velocity direction
+    const dragMag = DragModule.calculateDrag(state.velocity, area, cd, airDensity).value;
+    const dragForce =
+        state.velocity > 0 ? -dragMag :
+        state.velocity < 0 ?  dragMag :
+        0;
     
-    // Get thrust (only during powered ascent)
+    // FIX: Use weight as negative force (downward)
+    const weightForce = -state.mass * PHYSICS_CONSTANTS.GRAVITY;
+    
+    // Get thrust (only during powered ascent, only when moving upward)
     let thrust = 0;
     if (state.time < state.motorBurnTime && state.velocity >= 0) {
         const thrustResult = ThrustModule.getThrustAtTime(rocketConfig.motor, state.time);
         thrust = thrustResult.value;
     }
     
-    // Update mass (propellant burn)
+    // FIX: Use correct mass calculation during burn
     if (state.time < state.motorBurnTime) {
+        // Start with totalMass and reduce as propellant burns
+        const initialMass = rocketConfig.rocket.mass + rocketConfig.motor.totalMass +
+                            (rocketConfig.parachute ? rocketConfig.parachute.mass : 0) +
+                            rocketConfig.payloadMass;
+        
         state.mass = ThrustModule.getMassAtTime(
-            rocketConfig.rocket.mass + rocketConfig.motor.totalMass +
-            (rocketConfig.parachute ? rocketConfig.parachute.mass : 0) +
-            rocketConfig.payloadMass,
+            initialMass,
             rocketConfig.motor,
             state.time
         );
     }
     
-    // Calculate acceleration
-    const accelResult = ThrustModule.calculateAcceleration(thrust, dragForce, state.mass);
-    let acceleration = accelResult.value;
+    // Calculate net force and acceleration
+    const thrustForce = (state.time < state.motorBurnTime && state.velocity >= 0) ? thrust : 0;
     
-    console.log(`Forces: thrust=${thrust.toFixed(2)}N, drag=${dragForce.toFixed(4)}N, weight=${state.mass * PHYSICS_CONSTANTS.GRAVITY}N → acc=${acceleration.toFixed(2)}m/s²`);
+    // FIX: Properly sum forces with correct signs
+    const netForce = thrustForce + dragForce + weightForce;
+    let acceleration = netForce / state.mass;
+    
+    console.log(`Forces: thrust=${thrust.toFixed(2)}N, drag=${dragForce.toFixed(4)}N, weight=${weightForce.toFixed(2)}N → acc=${acceleration.toFixed(2)}m/s²`);
     
     // Constrain velocity during launch rod phase - rocket cannot fall down the rod
     if (state.onLaunchRod && acceleration < 0) {
@@ -208,9 +222,13 @@ function updateState(state, rocketConfig, launchConditions, deltaTime) {
     state.velocity += acceleration * deltaTime;
     state.altitude += state.velocity * deltaTime;
     
-    // Calculate wind drift
-    const windComponents = WindModel.getWindVelocityComponents(
+    // FIX: Use stronger wind aloft during descent for realistic drift
+    const windSpeedAtAlt = WindModel.getWindSpeedAtAltitude(
         launchConditions.windSpeed,
+        state.altitude
+    );
+    const windComponents = WindModel.getWindVelocityComponents(
+        windSpeedAtAlt,
         launchConditions.windDirection
     );
     
