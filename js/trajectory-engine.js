@@ -31,8 +31,8 @@ function simulateFlight(rocketConfig, launchConditions) {
  console.log(`Iter ${iterationCount}: t=${state.time.toFixed(3)}s, alt=${state.altitude.toFixed(2)}m, vel=${state.velocity.toFixed(3)}m/s`);
  }
  
- // Record current state
- trajectory.push(recordState(state));
+ // Record current state with visualization-enhanced data
+ trajectory.push(recordState(state, rocketConfig));
  
  // Get current phase
  const currentPhase = FlightPhases.getCurrentPhase(state);
@@ -74,7 +74,7 @@ function simulateFlight(rocketConfig, launchConditions) {
  state.altitude = 0;
  state.velocity = 0;
  state.landed = true;
- trajectory.push(recordState(state));
+ trajectory.push(recordState(state, rocketConfig));
  break;
  }
  
@@ -90,7 +90,7 @@ function simulateFlight(rocketConfig, launchConditions) {
  console.log('SIMULATION END - trajectory length:', trajectory.length);
  
  // Calculate summary statistics
- const stats = calculateFlightStatistics(trajectory, phaseTransitions, rocketConfig);
+ const stats = calculateFlightStatistics(trajectory, phaseTransitions, rocketConfig, launchConditions);
  console.log('Final Statistics:', stats);
  
  return {
@@ -247,9 +247,19 @@ function updateState(state, rocketConfig, launchConditions, deltaTime) {
 }
 
 /**
- * Record state for trajectory array.
+ * Record state for trajectory array with visualization-enhanced data.
  */
-function recordState(state) {
+function recordState(state, rocketConfig) {
+ // Calculate thrust at this time step
+ let thrust = 0;
+ if (state.time < state.motorBurnTime && state.velocity >= 0) {
+ const thrustResult = ThrustModule.getThrustAtTime(rocketConfig.motor, state.time);
+ thrust = thrustResult.value;
+ }
+ 
+ // Calculate burn time remaining
+ const burnTimeRemaining = Math.max(0, state.motorBurnTime - state.time);
+ 
  return {
  time: state.time,
  altitude: state.altitude,
@@ -257,14 +267,16 @@ function recordState(state) {
  horizontalX: state.horizontalX,
  horizontalY: state.horizontalY,
  mass: state.mass,
- phase: FlightPhases.getCurrentPhase(state)
+ phase: FlightPhases.getCurrentPhase(state),
+ thrust: thrust,
+ burnTimeRemaining: burnTimeRemaining
  };
 }
 
 /**
  * Calculate flight statistics from trajectory.
  */
-function calculateFlightStatistics(trajectory, phaseTransitions, rocketConfig) {
+function calculateFlightStatistics(trajectory, phaseTransitions, rocketConfig, launchConditions) {
  if (trajectory.length === 0) return {};
  
  const peakIndex = trajectory.reduce((maxIdx, point, idx, arr) => 
@@ -277,6 +289,15 @@ function calculateFlightStatistics(trajectory, phaseTransitions, rocketConfig) {
  const burnoutTime = rocketConfig?.motor?.burnTime || 2.0; // Default to 2 seconds if not specified
  const burnoutIndex = trajectory.findIndex(p => p.time >= burnoutTime);
  
+ // Calculate wind drift
+ const windDrift = WindModel.calculateTotalWindDrift(
+ launchConditions.windSpeed,
+ launchConditions.windDirection,
+ trajectory,
+ peakPoint.altitude,
+ landingPoint.time - peakPoint.time
+ );
+ 
  return {
  peakAltitude: peakPoint.altitude,
  peakAltitudeFeet: peakPoint.altitude / PHYSICS_CONSTANTS.FEET_TO_METERS,
@@ -287,7 +308,8 @@ function calculateFlightStatistics(trajectory, phaseTransitions, rocketConfig) {
  landingX: landingPoint.horizontalX,
  landingY: landingPoint.horizontalY,
  downrangeDistance: Math.sqrt(landingPoint.horizontalX**2 + landingPoint.horizontalY**2),
- downrangeFeet: Math.sqrt(landingPoint.horizontalX**2 + landingPoint.horizontalY**2) / PHYSICS_CONSTANTS.FEET_TO_METERS
+ downrangeFeet: Math.sqrt(landingPoint.horizontalX**2 + landingPoint.horizontalY**2) / PHYSICS_CONSTANTS.FEET_TO_METERS,
+ windDrift: windDrift
  };
 }
 
