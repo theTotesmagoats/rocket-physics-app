@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rocket Physics Simulator - Learn by Doing</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/modern-style.css">
     <style>
         /* Interactive Equation Display Styles */
         .equation-panel {
@@ -59,6 +59,36 @@
     </header>
 
     <main>
+        <!-- Visualization Section - Now at the top -->
+        <section id="visualization-section">
+            <div class="vis-header">
+                <h2>📈 Flight Simulation</h2>
+                <button id="play-pause-btn" class="control-btn">▶️ Play</button>
+                <div class="time-controls">
+                    <label for="time-scrubber">Time:</label>
+                    <input type="range" id="time-scrubber" min="0" max="100" value="0" step="1">
+                    <span id="current-time">0.0s</span>
+                </div>
+            </div>
+            
+            <div class="visualization-container">
+                <canvas id="flight-canvas" width="900" height="600"></canvas>
+                <div id="playback-overlay" class="overlay">
+                    <button id="reset-playback-btn" class="control-btn">🔄 Reset</button>
+                </div>
+            </div>
+            
+            <!-- Wind Visualization Legend -->
+            <div class="wind-legend">
+                <h4>💨 Wind Indicators</h4>
+                <div class="legend-items">
+                    <span class="legend-item"><span class="arrow-icon">→</span> Wind direction at altitude</span>
+                    <span class="legend-item"><span class="particle-icon">•</span> Particle drift path</span>
+                    <span class="legend-item"><span class="uncertainty-icon">○</span> Landing uncertainty ellipse</span>
+                </div>
+            </div>
+        </section>
+
         <!-- Rocket Builder Section -->
         <section id="rocket-builder">
             <h2>🔧 Build Your Rocket</h2>
@@ -130,12 +160,12 @@
 
         <!-- Results Section -->
         <section id="results" style="display: none;">
-            <h2>📊 Flight Results</h2>
+            <h2>📊 Flight Statistics</h2>
             
-            <div class="results-grid">
+            <div class="statistics-grid">
                 <!-- Key Metrics with Interactive Equations -->
                 <div class="metrics-panel">
-                    <h3>Flight Statistics</h3>
+                    <h3>Key Metrics</h3>
                     <div id="flight-stats">
                         <div class="stat-box" data-stat="peak-altitude" onclick="showEquation('peak-altitude')">
                             <h4>🏔️ Peak Altitude</h4>
@@ -162,6 +192,12 @@
                         </div>
                     </div>
                     
+                    <!-- Event Timeline -->
+                    <div class="event-timeline">
+                        <h4>⏱️ Flight Events</h4>
+                        <ul id="flight-events-list"></ul>
+                    </div>
+                    
                     <!-- Equation Display Area -->
                     <div id="equation-display" class="equation-panel" style="display: none;">
                         <h3 id="equation-title">Equation</h3>
@@ -174,11 +210,6 @@
                     <h3>📚 What's Happening (Feynman Style)</h3>
                     <div id="teaching-content"></div>
                 </div>
-            </div>
-
-            <!-- Visualization -->
-            <div class="visualization-container">
-                <canvas id="flight-canvas" width="800" height="500"></canvas>
             </div>
         </section>
     </main>

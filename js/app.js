@@ -126,6 +126,9 @@ async function loadComponentData() {
 function setupEventListeners() {
     const simulateBtn = document.getElementById('simulate-btn');
     const resetBtn = document.getElementById('reset-btn');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const timeScrubber = document.getElementById('time-scrubber');
+    const resetPlaybackBtn = document.getElementById('reset-playback-btn');
     
     if (simulateBtn) {
         simulateBtn.addEventListener('click', handleSimulate);
@@ -135,6 +138,21 @@ function setupEventListeners() {
     if (resetBtn) {
         resetBtn.addEventListener('click', handleReset);
         console.log('✅ Reset button listener attached');
+    }
+    
+    if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', () => Visualizer.togglePlayback(visualizer));
+        console.log('✅ Play/Pause button listener attached');
+    }
+    
+    if (timeScrubber) {
+        timeScrubber.addEventListener('input', () => Visualizer.updateTimeFromScrubber(visualizer));
+        console.log('✅ Time scrubber listener attached');
+    }
+    
+    if (resetPlaybackBtn) {
+        resetPlaybackBtn.addEventListener('click', () => Visualizer.resetPlayback(visualizer));
+        console.log('✅ Reset playback button listener attached');
     }
 }
 
@@ -172,8 +190,20 @@ async function handleSimulate() {
         console.log('📊 Simulation result:', result);
         console.log('📊 Statistics:', result.statistics);
         
+        // Calculate wind data for visualization
+        const windData = {
+            enabled: true,
+            speed: launchConditions.windSpeed,
+            direction: launchConditions.windDirection,
+            drift: result.statistics.windDrift?.feet || 0,
+            uncertainty: WindModel.calculateWindUncertainty(
+                launchConditions.windSpeed,
+                result.statistics.descentTime
+            )
+        };
+        
         // Display results
-        displayResults(result);
+        displayResults(result, windData);
     } catch (error) {
         console.error('❌ SIMULATION ERROR:', error);
         alert('Simulation failed: ' + error.message + '\nCheck console for details');
@@ -183,7 +213,7 @@ async function handleSimulate() {
 /**
  * Display simulation results.
  */
-function displayResults(result) {
+function displayResults(result, windData = null) {
     const resultsSection = document.getElementById('results');
     if (!resultsSection) {
         console.error('❌ Results section not found!');
@@ -196,12 +226,18 @@ function displayResults(result) {
     // Display statistics (including interactive equation boxes)
     displayStatisticsWithEquations(result.statistics);
     
+    // Display flight events in the UI
+    Visualizer.displayFlightEvents(result.trajectory, windData);
+    
     // Display teaching content
     Visualizer.displayTeachingContent(result.teachingContent);
     
-    // Draw visualization
+    // Draw visualization with full trajectory
     if (visualizer) {
-        Visualizer.drawFlightVisualization(visualizer, result);
+        Visualizer.drawFlightVisualization(visualizer, result, 1.0, windData);
+        
+        // Initialize animation system
+        visualizer.totalTime = result.statistics.totalFlightTime || 60;
     }
     
     // Scroll to results
@@ -247,9 +283,9 @@ function handleReset() {
     // Clear equation display
     hideEquation();
     
-    // Clear canvas
+    // Reset and clear canvas
     if (visualizer) {
-        visualizer.ctx.clearRect(0, 0, visualizer.width, visualizer.height);
+        Visualizer.resetPlayback(visualizer);
         Visualizer.drawBackground(visualizer);
     }
 }
@@ -270,8 +306,8 @@ function showEquation(statType) {
     // Highlight the clicked stat box
     const clickedBox = event.currentTarget;
     if (clickedBox) {
-        clickedBox.style.border = '2px solid #ffd700';
-        clickedBox.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.6)';
+        clickedBox.style.border = '2px solid #3498db';
+        clickedBox.style.boxShadow = '0 0 15px rgba(52, 152, 219, 0.6)';
     }
     
     let title, content;
@@ -303,7 +339,7 @@ function showEquation(statType) {
                     h_{n+1} = h_n + v_{n+1} × Δt
                 </div>
                 
-                <div class="equation-step">
+                <div class="equation-step highlight">
                     <strong>Step 3: Find Apogee</strong><br>
                     Peak altitude occurs when velocity crosses zero (v = 0).<br>
                     We track the maximum height reached during the flight.
