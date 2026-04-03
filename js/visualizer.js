@@ -35,6 +35,34 @@ function initializeVisualizer() {
 }
 
 /**
+ * Helper to calculate appropriate tick interval based on max value.
+ */
+function getTickInterval(maxValue) {
+    if (maxValue <= 100) return 25;
+    if (maxValue <= 250) return 50;
+    if (maxValue <= 500) return 100;
+    if (maxValue <= 1000) return 200;
+    if (maxValue <= 2000) return 500;
+    return 1000; // For very high flights
+}
+
+/**
+ * Helper to estimate max pixels for Y-axis based on altitude in feet.
+ */
+function maxAltitudePixels(maxAltFeet, yScale) {
+    const meters = maxAltFeet * PHYSICS_CONSTANTS.FEET_TO_METERS;
+    return meters * yScale;
+}
+
+/**
+ * Helper to estimate max pixels for X-axis based on distance in feet.
+ */
+function maxHorizontalPixels(maxHorizFeet, xScale) {
+    const meters = maxHorizFeet * PHYSICS_CONSTANTS.FEET_TO_METERS;
+    return meters * xScale;
+}
+
+/**
  * Draw the complete flight visualization.
  */
 function drawFlightVisualization(viz, simulationResult) {
@@ -90,18 +118,6 @@ function drawFlightVisualization(viz, simulationResult) {
 }
 
 /**
- * Helper to calculate appropriate tick interval based on max value.
- */
-function getTickInterval(maxValue) {
-    if (maxValue <= 100) return 25;
-    if (maxValue <= 250) return 50;
-    if (maxValue <= 500) return 100;
-    if (maxValue <= 1000) return 200;
-    if (maxValue <= 2000) return 500;
-    return 1000; // For very high flights
-}
-
-/**
  * Draw axes with labeled tick marks showing measurements in feet.
  */
 function drawDynamicAxes(viz, scale, maxAltFeet, maxHorizontalFeet) {
@@ -109,7 +125,6 @@ function drawDynamicAxes(viz, scale, maxAltFeet, maxHorizontalFeet) {
     
     // Constants for axis drawing
     const padding = 50;
-    const axisLabelOffset = 20;
     const tickLength = 8;
     
     // Y-axis (altitude)
@@ -206,22 +221,6 @@ function drawDynamicAxes(viz, scale, maxAltFeet, maxHorizontalFeet) {
     const midX = (xAxisLeft + xAxisRight) / 2;
     ctx.textAlign = 'center';
     ctx.fillText('Distance from Launch (ft)', midX, xAxisY + 30);
-}
-
-/**
- * Helper to estimate max pixels for Y-axis based on altitude in feet.
- */
-function maxAltitudePixels(maxAltFeet, yScale) {
-    const meters = maxAltFeet * PHYSICS_CONSTANTS.FEET_TO_METERS;
-    return meters * yScale;
-}
-
-/**
- * Helper to estimate max pixels for X-axis based on distance in feet.
- */
-function maxHorizontalPixels(maxHorizFeet, xScale) {
-    const meters = maxHorizFeet * PHYSICS_CONSTANTS.FEET_TO_METERS;
-    return meters * xScale;
 }
 
 /**
