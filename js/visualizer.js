@@ -70,11 +70,11 @@ function drawFlightVisualization(viz, simulationResult) {
     
     console.log('📏 Max altitude:', maxAltFeet.toFixed(0), 'ft, Max horizontal:', maxHorizontalFeet.toFixed(0), 'ft');
     
-    // Draw background with dynamic axes
-    drawBackground(viz, maxAltitude, maxHorizontal);
-    
-    // Calculate scaling
+    // Calculate scaling first
     const scale = calculateScale(trajectory, width, height);
+    
+    // Draw background with dynamic axes (need to pass scale)
+    drawBackground(viz, maxAltitude, maxHorizontal, scale);
     
     // Draw trajectory
     drawTrajectoryPath(viz, trajectory, scale);
@@ -108,14 +108,14 @@ function drawDynamicAxes(viz, scale, maxAltFeet, maxHorizontalFeet) {
     const { ctx, width, height } = viz;
     
     // Constants for axis drawing
+    const padding = 50;
     const axisLabelOffset = 20;
     const tickLength = 8;
-    const padding = 50;
     
     // Y-axis (altitude)
-    const yAxisX = padding; // Left side
-    const yAxisBottom = height - padding;
-    const yAxisTop = padding;
+    const yAxisX = scale.offsetX; // Left side of plot area
+    const yAxisBottom = scale.offsetY;
+    const yAxisTop = scale.offsetY - maxAltitudePixels(maxAltFeet, scale.y);
     
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2;
@@ -141,7 +141,7 @@ function drawDynamicAxes(viz, scale, maxAltFeet, maxHorizontalFeet) {
         const metersValue = feetValue * PHYSICS_CONSTANTS.FEET_TO_METERS;
         const yPos = scale.offsetY - metersValue * scale.y;
         
-        if (yPos >= yAxisTop) {
+        if (yPos >= yAxisTop && yPos <= yAxisBottom) {
             // Draw tick mark
             ctx.beginPath();
             ctx.moveTo(yAxisX, yPos);
@@ -154,17 +154,18 @@ function drawDynamicAxes(viz, scale, maxAltFeet, maxHorizontalFeet) {
     }
     
     // Y-axis title
+    const midY = (yAxisTop + yAxisBottom) / 2;
     ctx.save();
-    ctx.translate(yAxisX - 30, (yAxisTop + yAxisBottom) / 2);
+    ctx.translate(yAxisX - 30, midY);
     ctx.rotate(-Math.PI / 2);
     ctx.textAlign = 'center';
     ctx.fillText('Altitude (ft)', 0, 0);
     ctx.restore();
     
     // X-axis (horizontal distance)
-    const xAxisY = height - padding; // Bottom
-    const xAxisLeft = padding;
-    const xAxisRight = width - padding;
+    const xAxisY = scale.offsetY; // Bottom of plot area
+    const xAxisLeft = scale.offsetX;
+    const xAxisRight = scale.offsetX + maxHorizontalPixels(maxHorizontalFeet, scale.x);
     
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2;
@@ -189,7 +190,7 @@ function drawDynamicAxes(viz, scale, maxAltFeet, maxHorizontalFeet) {
         const metersValue = feetValue * PHYSICS_CONSTANTS.FEET_TO_METERS;
         const xPos = scale.offsetX + metersValue * scale.x;
         
-        if (xPos <= xAxisRight) {
+        if (xPos >= xAxisLeft && xPos <= xAxisRight) {
             // Draw tick mark
             ctx.beginPath();
             ctx.moveTo(xPos, xAxisY);
@@ -202,14 +203,31 @@ function drawDynamicAxes(viz, scale, maxAltFeet, maxHorizontalFeet) {
     }
     
     // X-axis title
+    const midX = (xAxisLeft + xAxisRight) / 2;
     ctx.textAlign = 'center';
-    ctx.fillText('Distance from Launch (ft)', (xAxisLeft + xAxisRight) / 2, xAxisY + 30);
+    ctx.fillText('Distance from Launch (ft)', midX, xAxisY + 30);
+}
+
+/**
+ * Helper to estimate max pixels for Y-axis based on altitude in feet.
+ */
+function maxAltitudePixels(maxAltFeet, yScale) {
+    const meters = maxAltFeet * PHYSICS_CONSTANTS.FEET_TO_METERS;
+    return meters * yScale;
+}
+
+/**
+ * Helper to estimate max pixels for X-axis based on distance in feet.
+ */
+function maxHorizontalPixels(maxHorizFeet, xScale) {
+    const meters = maxHorizFeet * PHYSICS_CONSTANTS.FEET_TO_METERS;
+    return meters * xScale;
 }
 
 /**
  * Draw the complete flight visualization.
  */
-function drawBackground(viz, maxAltitudeMeters = null, maxHorizontalMeters = null) {
+function drawBackground(viz, maxAltitudeMeters = null, maxHorizontalMeters = null, scale = null) {
     const { ctx, width, height } = viz;
     
     // Sky gradient
@@ -240,12 +258,12 @@ function drawBackground(viz, maxAltitudeMeters = null, maxHorizontalMeters = nul
         ctx.stroke();
     }
     
-    // Draw dynamic axes with labeled tick marks in feet
-    if (maxAltitudeMeters !== null && maxHorizontalMeters !== null) {
+    // Draw dynamic axes with labeled tick marks in feet if we have data
+    if (maxAltitudeMeters !== null && maxHorizontalMeters !== null && scale !== null) {
         const maxAltFeet = maxAltitudeMeters / PHYSICS_CONSTANTS.FEET_TO_METERS;
         const maxHorizontalFeet = maxHorizontalMeters / PHYSICS_CONSTANTS.FEET_TO_METERS;
         
-        drawDynamicAxes(viz, { x: 1, y: 1, offsetX: 50, offsetY: height - 50 }, maxAltFeet, maxHorizontalFeet);
+        drawDynamicAxes(viz, scale, maxAltFeet, maxHorizontalFeet);
     }
 }
 
@@ -505,7 +523,9 @@ if (typeof window !== 'undefined') {
         displayTeachingContent,
         drawBackground,
         getTickInterval,
-        drawDynamicAxes
+        drawDynamicAxes,
+        maxAltitudePixels,
+        maxHorizontalPixels
     };
 }
 
@@ -518,6 +538,8 @@ if (typeof module !== 'undefined' && module.exports) {
         displayTeachingContent,
         drawBackground,
         getTickInterval,
-        drawDynamicAxes
+        drawDynamicAxes,
+        maxAltitudePixels,
+        maxHorizontalPixels
     };
 }
