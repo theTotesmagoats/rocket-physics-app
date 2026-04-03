@@ -29,7 +29,7 @@ async function initializeApp() {
     
     console.log('📦 Checking module availability:');
     requiredModules.forEach(moduleName => {
-        const exists = typeof window[moduleName] !== 'undefined');
+        const exists = typeof window[moduleName] !== 'undefined';
         console.log(`   ${exists ? '✅' : '❌'} ${moduleName}`);
     });
     
