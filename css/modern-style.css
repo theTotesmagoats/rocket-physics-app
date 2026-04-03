@@ -1,0 +1,508 @@
+/* ============================================
+   MODERN AEROSPACE / EDUCATIONAL THEME
+   Clean, professional look for physics education
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom, #f5f7fa 0%, #e8ecf1 100%);
+    color: #2c3e50;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+header {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+    text-align: center;
+    border-bottom: 2px solid #34495e;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    background: linear-gradient(to right, #3498db, #2ecc71);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+}
+
+main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ============================================
+   VISUALIZATION SECTION (NOW AT THE TOP)
+   ============================================ */
+#visualization-section {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.vis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.vis-header h2 {
+    color: #34495e;
+    font-size: 1.8rem;
+}
+
+.time-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.time-controls label {
+    color: #34495e;
+    font-weight: 600;
+}
+
+#time-scrubber {
+    width: 200px;
+    cursor: pointer;
+}
+
+.current-time {
+    font-weight: bold;
+    color: #3498db;
+}
+
+/* ============================================
+   VISUALIZATION CONTAINER
+   ============================================ */
+.visualization-container {
+    position: relative;
+    background: #ecf0f1;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: inset 0 2px 15px rgba(0,0,0,0.1);
+}
+
+#flight-canvas {
+    display: block;
+    margin: 0 auto;
+    background: #f0f4f8;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 900px;
+    height: auto;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+.overlay.active {
+    pointer-events: auto;
+}
+
+/* ============================================
+   WIND LEGEND
+   ============================================ */
+.wind-legend {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 8px;
+}
+
+.wind-legend h4 {
+    color: #3498db;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.legend-items {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #34495e;
+    font-size: 0.9rem;
+}
+
+.arrow-icon, .particle-icon, .uncertainty-icon {
+    font-weight: bold;
+}
+
+/* ============================================
+   PANEL STYLING
+   ============================================ */
+section {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+section h2 {
+    color: #3498db;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+section h3 {
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   BUILDER GRID
+   ============================================ */
+.builder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.builder-panel {
+    background: #f8f9fa;
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #e0e6ed;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: #34495e;
+    font-weight: 600;
+}
+
+select, input[type="number"] {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px solid #dfe6e9;
+    border-radius: 8px;
+    background: white;
+    color: #2c3e50;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+select:focus, input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+small {
+    display: block;
+    color: #7f8c8d;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+/* ============================================
+   COMPONENT DETAILS
+   ============================================ */
+.component-details {
+    background: linear-gradient(to right, #e3f2fd, #ffffff);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.component-details p {
+    margin: 0.5rem 0;
+    color: #34495e;
+}
+
+/* ============================================
+   CONDITIONS GRID
+   ============================================ */
+.conditions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.condition-panel {
+    background: #f8f9fa;
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #e0e6ed;
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+#actions {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+button {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.primary-button {
+    background: linear-gradient(to right, #3498db, #2980b9);
+    color: white;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.primary-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+}
+
+#reset-btn {
+    background: #ecf0f1;
+    color: #34495e;
+    border: 2px solid #bdc3c7;
+}
+
+#reset-btn:hover {
+    background: #dfe6e9;
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   CONTROL BUTTONS
+   ============================================ */
+.control-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+#play-pause-btn {
+    background: #2ecc71;
+    color: white;
+}
+
+#play-pause-btn:hover {
+    background: #27ae60;
+}
+
+#reset-playback-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+#reset-playback-btn:hover {
+    background: #c0392b;
+}
+
+/* ============================================
+   RESULTS SECTION
+   ============================================ */
+.results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #visualization-section {
+        order: -1; /* Visualization still at top on mobile */
+    }
+}
+
+/* ============================================
+   METRICS PANEL
+   ============================================ */
+.metrics-panel {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e0e6ed;
+}
+
+#flight-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-box {
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    padding: 1.25rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.stat-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    border-color: #3498db;
+}
+
+.stat-box h4 {
+    color: #3498db;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.stat-box span {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.stat-box small {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+/* ============================================
+   EVENT TIMELINE
+   ============================================ */
+.event-timeline {
+    background: linear-gradient(to right, #e3f2fd, #ffffff);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.event-timeline h4 {
+    color: #3498db;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+#flight-events-list {
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+}
+
+#flight-events-list li {
+    padding: 0.75rem;
+    background: white;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+    color: #2c3e50;
+}
+
+/* ============================================
+   TEACHING PANEL
+   ============================================ */
+.teaching-panel {
+    background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e0e6ed;
+}
+
+.teaching-panel h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #3498db;
+}
+
+.phase-explanation {
+    background: linear-gradient(to right, #fff3cd, #ffffff);
+    border-left: 4px solid #ffc107;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-radius: 0 8px 8px 0;
+}
+
+.phase-explanation h4 {
+    color: #e67e22;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.phase-explanation p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #34495e;
+}
+
+.feynman-quote {
+    font-style: italic;
+    color: #7f8c8d;
+    margin-top: 0.75rem;
+    padding-left: 1.25rem;
+    border-left: 3px solid #bdc3c7;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+footer {
+    text-align: center;
+    padding: 2rem;
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    background: rgba(255, 255, 255, 0.8);
+}
