@@ -55,8 +55,23 @@ function drawFlightVisualization(viz, simulationResult) {
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
     
-    // Draw background elements
-    drawBackground(viz);
+    // Calculate max values for dynamic scaling
+    let maxAltitude = 0;
+    let maxHorizontal = 0;
+    trajectory.forEach(point => {
+        maxAltitude = Math.max(maxAltitude, point.altitude);
+        const horizontalDist = Math.sqrt(point.horizontalX**2 + point.horizontalY**2);
+        maxHorizontal = Math.max(maxHorizontal, horizontalDist);
+    });
+    
+    // Convert to feet for axis labeling
+    const maxAltFeet = maxAltitude / PHYSICS_CONSTANTS.FEET_TO_METERS;
+    const maxHorizontalFeet = maxHorizontal / PHYSICS_CONSTANTS.FEET_TO_METERS;
+    
+    console.log('📏 Max altitude:', maxAltFeet.toFixed(0), 'ft, Max horizontal:', maxHorizontalFeet.toFixed(0), 'ft');
+    
+    // Draw background with dynamic axes
+    drawBackground(viz, maxAltitude, maxHorizontal);
     
     // Calculate scaling
     const scale = calculateScale(trajectory, width, height);
@@ -72,6 +87,166 @@ function drawFlightVisualization(viz, simulationResult) {
     
     // Draw legend
     drawLegend(viz);
+}
+
+/**
+ * Helper to calculate appropriate tick interval based on max value.
+ */
+function getTickInterval(maxValue) {
+    if (maxValue <= 100) return 25;
+    if (maxValue <= 250) return 50;
+    if (maxValue <= 500) return 100;
+    if (maxValue <= 1000) return 200;
+    if (maxValue <= 2000) return 500;
+    return 1000; // For very high flights
+}
+
+/**
+ * Draw axes with labeled tick marks showing measurements in feet.
+ */
+function drawDynamicAxes(viz, scale, maxAltFeet, maxHorizontalFeet) {
+    const { ctx, width, height } = viz;
+    
+    // Constants for axis drawing
+    const axisLabelOffset = 20;
+    const tickLength = 8;
+    const padding = 50;
+    
+    // Y-axis (altitude)
+    const yAxisX = padding; // Left side
+    const yAxisBottom = height - padding;
+    const yAxisTop = padding;
+    
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '10px Arial';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    
+    // Draw Y-axis line
+    ctx.beginPath();
+    ctx.moveTo(yAxisX, yAxisTop);
+    ctx.lineTo(yAxisX, yAxisBottom);
+    ctx.stroke();
+    
+    // Calculate tick interval for altitude
+    const altTickInterval = getTickInterval(maxAltFeet);
+    const numAltTicks = Math.ceil(maxAltFeet / altTickInterval);
+    
+    // Draw Y-axis ticks and labels (feet)
+    for (let i = 0; i <= numAltTicks; i++) {
+        const feetValue = i * altTickInterval;
+        // Convert feet to meters then apply scale
+        const metersValue = feetValue * PHYSICS_CONSTANTS.FEET_TO_METERS;
+        const yPos = scale.offsetY - metersValue * scale.y;
+        
+        if (yPos >= yAxisTop) {
+            // Draw tick mark
+            ctx.beginPath();
+            ctx.moveTo(yAxisX, yPos);
+            ctx.lineTo(yAxisX + tickLength, yPos);
+            ctx.stroke();
+            
+            // Draw label
+            ctx.fillText(feetValue.toFixed(0), yAxisX - 5, yPos);
+        }
+    }
+    
+    // Y-axis title
+    ctx.save();
+    ctx.translate(yAxisX - 30, (yAxisTop + yAxisBottom) / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.fillText('Altitude (ft)', 0, 0);
+    ctx.restore();
+    
+    // X-axis (horizontal distance)
+    const xAxisY = height - padding; // Bottom
+    const xAxisLeft = padding;
+    const xAxisRight = width - padding;
+    
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    
+    // Draw X-axis line
+    ctx.beginPath();
+    ctx.moveTo(xAxisLeft, xAxisY);
+    ctx.lineTo(xAxisRight, xAxisY);
+    ctx.stroke();
+    
+    // Calculate tick interval for horizontal distance
+    const horizTickInterval = getTickInterval(maxHorizontalFeet);
+    const numHorizTicks = Math.ceil(maxHorizontalFeet / horizTickInterval);
+    
+    // Draw X-axis ticks and labels (feet)
+    for (let i = 0; i <= numHorizTicks; i++) {
+        const feetValue = i * horizTickInterval;
+        // Convert feet to meters then apply scale
+        const metersValue = feetValue * PHYSICS_CONSTANTS.FEET_TO_METERS;
+        const xPos = scale.offsetX + metersValue * scale.x;
+        
+        if (xPos <= xAxisRight) {
+            // Draw tick mark
+            ctx.beginPath();
+            ctx.moveTo(xPos, xAxisY);
+            ctx.lineTo(xPos, xAxisY - tickLength);
+            ctx.stroke();
+            
+            // Draw label
+            ctx.fillText(feetValue.toFixed(0), xPos, xAxisY + 5);
+        }
+    }
+    
+    // X-axis title
+    ctx.textAlign = 'center';
+    ctx.fillText('Distance from Launch (ft)', (xAxisLeft + xAxisRight) / 2, xAxisY + 30);
+}
+
+/**
+ * Draw the complete flight visualization.
+ */
+function drawBackground(viz, maxAltitudeMeters = null, maxHorizontalMeters = null) {
+    const { ctx, width, height } = viz;
+    
+    // Sky gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, '#0a0a1a');
+    gradient.addColorStop(0.5, '#1a1a3e');
+    gradient.addColorStop(1, '#2d4a3e');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    
+    // Horizontal grid lines (altitude) - every 100 pixels for visual reference
+    for (let y = 0; y < height; y += 100) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+    }
+    
+    // Vertical grid lines - every 100 pixels for visual reference
+    for (let x = 0; x < width; x += 100) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+    }
+    
+    // Draw dynamic axes with labeled tick marks in feet
+    if (maxAltitudeMeters !== null && maxHorizontalMeters !== null) {
+        const maxAltFeet = maxAltitudeMeters / PHYSICS_CONSTANTS.FEET_TO_METERS;
+        const maxHorizontalFeet = maxHorizontalMeters / PHYSICS_CONSTANTS.FEET_TO_METERS;
+        
+        drawDynamicAxes(viz, { x: 1, y: 1, offsetX: 50, offsetY: height - 50 }, maxAltFeet, maxHorizontalFeet);
+    }
 }
 
 /**
@@ -142,7 +317,7 @@ function drawTrajectoryPath(viz, trajectory, scale) {
     // Draw ascent path (green)
     ctx.beginPath();
     ctx.strokeStyle = '#4ecdc4';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     
     for (let i = 0; i <= apogeeIndex; i++) {
         const point = trajectory[i];
@@ -160,7 +335,7 @@ function drawTrajectoryPath(viz, trajectory, scale) {
     // Draw descent path (orange)
     ctx.beginPath();
     ctx.strokeStyle = '#ffc107';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     
     for (let i = apogeeIndex; i < trajectory.length; i++) {
         const point = trajectory[i];
@@ -225,41 +400,6 @@ function drawPoint(viz, x, y, color, icon) {
     ctx.font = '14px Arial';
     ctx.textAlign = 'center';
     ctx.fillText(icon, x, y - 10);
-}
-
-/**
- * Draw background elements (grid, sky gradient).
- */
-function drawBackground(viz) {
-    const { ctx, width, height } = viz;
-    
-    // Sky gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, '#0a0a1a');
-    gradient.addColorStop(0.5, '#1a1a3e');
-    gradient.addColorStop(1, '#2d4a3e');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-    
-    // Grid lines
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.lineWidth = 1;
-    
-    // Horizontal grid lines (altitude)
-    for (let y = 0; y < height; y += 50) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
-    }
-    
-    // Vertical grid lines
-    for (let x = 0; x < width; x += 50) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
-    }
 }
 
 /**
@@ -363,7 +503,9 @@ if (typeof window !== 'undefined') {
         drawFlightVisualization,
         displayStatistics,
         displayTeachingContent,
-        drawBackground
+        drawBackground,
+        getTickInterval,
+        drawDynamicAxes
     };
 }
 
@@ -374,6 +516,8 @@ if (typeof module !== 'undefined' && module.exports) {
         drawFlightVisualization,
         displayStatistics,
         displayTeachingContent,
-        drawBackground
+        drawBackground,
+        getTickInterval,
+        drawDynamicAxes
     };
 }
