@@ -29,7 +29,7 @@ async function initializeApp() {
     
     console.log('📦 Checking module availability:');
     requiredModules.forEach(moduleName => {
-        const exists = typeof window[moduleName] !== 'undefined';
+        const exists = typeof window[moduleName] !== 'undefined');
         console.log(`   ${exists ? '✅' : '❌'} ${moduleName}`);
     });
     
@@ -193,8 +193,8 @@ function displayResults(result) {
     // Show results section
     resultsSection.style.display = 'block';
     
-    // Display statistics
-    Visualizer.displayStatistics(result.statistics);
+    // Display statistics (including interactive equation boxes)
+    displayStatisticsWithEquations(result.statistics);
     
     // Display teaching content
     Visualizer.displayTeachingContent(result.teachingContent);
@@ -206,6 +206,22 @@ function displayResults(result) {
     
     // Scroll to results
     resultsSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+/**
+ * Display statistics with interactive equation boxes.
+ */
+function displayStatisticsWithEquations(stats) {
+    const peakAltitude = stats.peakAltitudeFeet || 0;
+    const totalTime = stats.totalFlightTime || 0;
+    const maxVelocity = stats.maxVelocity || 0;
+    const downrange = stats.downrangeFeet || 0;
+    
+    // Update the statistics display
+    document.getElementById('peak-altitude-value').textContent = `${peakAltitude.toFixed(0)} ft`;
+    document.getElementById('total-flight-time-value').textContent = `${totalTime.toFixed(1)} s`;
+    document.getElementById('max-velocity-value').textContent = `${maxVelocity.toFixed(1)} m/s (${(maxVelocity * 2.237).toFixed(0)} mph)`;
+    document.getElementById('downrange-value').textContent = `${downrange.toFixed(0)} ft`;
 }
 
 /**
@@ -228,11 +244,251 @@ function handleReset() {
         resultsSection.style.display = 'none';
     }
     
+    // Clear equation display
+    hideEquation();
+    
     // Clear canvas
     if (visualizer) {
         visualizer.ctx.clearRect(0, 0, visualizer.width, visualizer.height);
         Visualizer.drawBackground(visualizer);
     }
+}
+
+/**
+ * Show equation for a given statistic.
+ */
+function showEquation(statType) {
+    const equationDisplay = document.getElementById('equation-display');
+    if (!equationDisplay) return;
+    
+    // Hide all stat boxes' highlighting first
+    document.querySelectorAll('.stat-box').forEach(box => {
+        box.style.border = '';
+        box.style.boxShadow = '';
+    });
+    
+    // Highlight the clicked stat box
+    const clickedBox = event.currentTarget;
+    if (clickedBox) {
+        clickedBox.style.border = '2px solid #ffd700';
+        clickedBox.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.6)';
+    }
+    
+    let title, content;
+    
+    switch (statType) {
+        case 'peak-altitude':
+            title = 'Peak Altitude Calculation';
+            content = `
+                <div class="equation-display">
+                    <strong>Physics Principle:</strong> Conservation of Energy<br>
+                    Initial kinetic energy converts to gravitational potential energy
+                </div>
+                
+                <h4>The Equation:</h4>
+                <div class="equation-display">h_max = h₀ + ∫v(t)dt from 0 to t_apogee</div>
+                
+                <h4>How It's Solved (Step by Step):</h4>
+                
+                <div class="equation-step highlight">
+                    <strong>Step 1: Numerical Integration</strong><br>
+                    The rocket's velocity changes continuously due to thrust, drag, and gravity.<br>
+                    We use Forward Euler integration:<br>
+                    v_{n+1} = v_n + a_n × Δt
+                </div>
+                
+                <div class="equation-step">
+                    <strong>Step 2: Altitude Update</strong><br>
+                    As velocity changes, we update altitude:<br>
+                    h_{n+1} = h_n + v_{n+1} × Δt
+                </div>
+                
+                <div class="equation-step">
+                    <strong>Step 3: Find Apogee</strong><br>
+                    Peak altitude occurs when velocity crosses zero (v = 0).<br>
+                    We track the maximum height reached during the flight.
+                </div>
+                
+                <h4>Key Variables:</h4>
+                <div class="variable-definition">
+                    • h_max: Maximum altitude above launch point<br>
+                    • v(t): Velocity as a function of time<br>
+                    • t_apogee: Time when vertical velocity = 0<br>
+                    • Δt: Time step (typically 0.01-0.1 seconds)
+                </div>
+            `;
+            break;
+            
+        case 'flight-time':
+            title = 'Total Flight Time Calculation';
+            content = `
+                <div class="equation-display">
+                    <strong>Physics Principle:</strong> Time Integration of Motion
+                </div>
+                
+                <h4>The Equation:</h4>
+                <div class="equation-display">t_total = t_ascent + t_descent</div>
+                
+                <h4>How It's Solved (Step by Step):</h4>
+                
+                <div class="equation-step highlight">
+                    <strong>Step 1: Powered Ascent Phase</strong><br>
+                    Motor provides thrust for burn_time seconds.<br>
+                    Acceleration: a = (T - D - mg) / m
+                </div>
+                
+                <div class="equation-step">
+                    <strong>Step 2: Coasting Ascent</strong><br>
+                    After burnout, rocket continues upward on momentum.<br>
+                    Deceleration: a = (-D - mg) / m
+                </div>
+                
+                <div class="equation-step highlight">
+                    <strong>Step 3: Descent Phase</strong><br>
+                    Parachute deploys at apogee.<br>
+                    Terminal velocity reached when drag = weight:<br>
+                    ½ρv²C_dA = mg → v_terminal = √(2mg / ρC_dA)
+                </div>
+                
+                <h4>Key Variables:</h4>
+                <div class="variable-definition">
+                    • t_ascent: Time from launch to apogee<br>
+                    • t_descent: Time from apogee to landing<br>
+                    • T: Thrust force, D: Drag force<br>
+                    • m: Rocket mass, g: Gravity (9.81 m/s²)
+                </div>
+            `;
+            break;
+            
+        case 'max-velocity':
+            title = 'Maximum Velocity Calculation';
+            content = `
+                <div class="equation-display">
+                    <strong>Physics Principle:</strong> Newton's Second Law
+                </div>
+                
+                <h4>The Equation:</h4>
+                <div class="equation-display">v_max = max(v(t)) during flight</div>
+                
+                <h4>How It's Solved (Step by Step):</h4>
+                
+                <div class="equation-step highlight">
+                    <strong>Step 1: Calculate Net Force</strong><br>
+                    During powered ascent:<br>
+                    F_net = Thrust - Drag - Weight
+                </div>
+                
+                <div class="equation-step">
+                    <strong>Step 2: Calculate Acceleration</strong><br>
+                    a = F_net / m (Newton's Second Law)<br>
+                    Note: Mass decreases as fuel burns!
+                </div>
+                
+                <div class="equation-step highlight">
+                    <strong>Step 3: Update Velocity</strong><br>
+                    Using Forward Euler:<br>
+                    v_{n+1} = v_n + a_n × Δt
+                </div>
+                
+                <div class="equation-step">
+                    <strong>Step 4: Track Maximum</strong><br>
+                    Continue updating until velocity starts decreasing.<br>
+                    The highest value reached is v_max.
+                </div>
+                
+                <h4>Key Variables:</h4>
+                <div class="variable-definition">
+                    • v_max: Peak velocity (usually during powered ascent)<br>
+                    • T: Thrust from motor<br>
+                    • D = ½ρv²C_dA: Drag force<br>
+                    • m(t): Time-varying mass
+                </div>
+                
+                <div class="equation-step highlight">
+                    <strong>Why It Matters:</strong><br>
+                    Maximum velocity determines the dynamic pressure on your rocket.<br>
+                    This is critical for structural integrity!
+                </div>
+            `;
+            break;
+            
+        case 'downrange':
+            title = 'Downrange Distance Calculation';
+            content = `
+                <div class="equation-display">
+                    <strong>Physics Principle:</strong> Wind Drift Integration
+                </div>
+                
+                <h4>The Equation:</h4>
+                <div class="equation-display">D_downrange = ∫v_wind(h(t)) × dt</div>
+                
+                <h4>How It's Solved (Step by Step):</h4>
+                
+                <div class="equation-step highlight">
+                    <strong>Step 1: Wind Model</strong><br>
+                    Get wind speed at each altitude:<br>
+                    v_wind(h) = wind_speed × f(height)
+                </div>
+                
+                <div class="equation-step">
+                    <strong>Step 2: Time Spent at Each Altitude</strong><br>
+                    During ascent/descent, calculate time spent<br>
+                    at each altitude slice: Δt = Δh / |v_z|
+                </div>
+                
+                <div class="equation-step highlight">
+                    <strong>Step 3: Horizontal Drift Integration</strong><br>
+                    For each time step:<br>
+                    Δx = v_wind × cos(direction) × Δt<br>
+                    Δy = v_wind × sin(direction) × Δt
+                </div>
+                
+                <div class="equation-step">
+                    <strong>Step 4: Total Drift</strong><br>
+                    Sum all horizontal displacements:<br>
+                    D_total = √(ΣΔx)² + (ΣΔy)²
+                </div>
+                
+                <h4>Key Variables:</h4>
+                <div class="variable-definition">
+                    • v_wind: Wind velocity vector<br>
+                    • h(t): Altitude as function of time<br>
+                    • direction: Wind direction in radians<br>
+                    • Δt: Time step size
+                </div>
+                
+                <div class="equation-step highlight">
+                    <strong>Feynman's Insight:</strong><br>
+                    "Wind doesn't push your rocket horizontally—it pushes while the rocket is aloft.<br>
+                    The longer it stays up, the more it drifts!"
+                </div>
+            `;
+            break;
+            
+        default:
+            return;
+    }
+    
+    // Update the equation display
+    document.getElementById('equation-title').textContent = title;
+    document.getElementById('equation-content').innerHTML = content;
+    equationDisplay.style.display = 'block';
+}
+
+/**
+ * Hide the equation display.
+ */
+function hideEquation() {
+    const equationDisplay = document.getElementById('equation-display');
+    if (equationDisplay) {
+        equationDisplay.style.display = 'none';
+    }
+    
+    // Clear all stat box highlighting
+    document.querySelectorAll('.stat-box').forEach(box => {
+        box.style.border = '';
+        box.style.boxShadow = '';
+    });
 }
 
 /**
@@ -350,6 +606,9 @@ if (typeof window !== 'undefined') {
         initializeApp,
         handleSimulate,
         getFallbackData,
-        loadComponentData
+        loadComponentData,
+        showEquation,
+        hideEquation,
+        displayStatisticsWithEquations
     };
 }
