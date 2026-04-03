@@ -62,6 +62,32 @@ function calculateHorizontalDrift(windVx, windVy, deltaTime, phase, parachuteDep
 }
 
 /**
+ * Calculate total wind drift from trajectory data.
+ */
+function calculateTotalWindDrift(windSpeedMph, windDirectionDegrees, trajectory, maxAltitude, descentTime) {
+    // Calculate horizontal displacement at each step
+    let totalDrift = 0;
+    
+    if (trajectory.length > 1) {
+        const initialX = trajectory[0].horizontalX;
+        const finalX = trajectory[trajectory.length - 1].horizontalX;
+        const initialY = trajectory[0].horizontalY;
+        const finalY = trajectory[trajectory.length - 1].horizontalY;
+        
+        totalDrift = Math.sqrt(
+            (finalX - initialX)**2 + 
+            (finalY - initialY)**2
+        );
+    }
+    
+    return {
+        meters: totalDrift,
+        feet: totalDrift / PHYSICS_CONSTANTS.FEET_TO_METERS,
+        direction: windDirectionDegrees
+    };
+}
+
+/**
  * Estimate total downrange distance based on flight parameters.
  * This is a predictive calculation before full simulation.
  */
@@ -116,16 +142,35 @@ function getWindSpeedAtAltitude(groundWindSpeedMph, altitudeMeters) {
     return groundWindSpeedMph * Math.min(increaseFactor, 2);  // Cap at 2x ground speed
 }
 
+/**
+ * Calculate wind uncertainty ellipse for landing prediction.
+ */
+function calculateWindUncertainty(windSpeedMph, descentTimeSeconds) {
+    // Simplified model: uncertainty grows with wind speed and time aloft
+    const baseDrift = windSpeedMph * PHYSICS_CONSTANTS.MILES_PER_HOUR_TO_M_S * descentTimeSeconds;
+    
+    // Add ~20% uncertainty due to gusts and variable conditions
+    const uncertaintyFactor = 1.2;
+    
+    return {
+        dx: baseDrift * uncertaintyFactor,
+        dy: baseDrift * 0.8,  // Typically less uncertainty in crosswind direction
+        explanation: `Wind uncertainty adds ~${(baseDrift * (uncertaintyFactor - 1) / PHYSICS_CONSTANTS.FEET_TO_METERS).toFixed(0)} feet to landing prediction`
+    };
+}
+
 // Export to global window object for browser use
 if (typeof window !== 'undefined') {
     window.WindModel = {
         windDirectionToRadians,
         getWindVelocityComponents,
         calculateHorizontalDrift,
+        calculateTotalWindDrift,
         estimateDownrangeDistance,
         getDownrangeExplanation,
         getWindDirectionString,
-        getWindSpeedAtAltitude
+        getWindSpeedAtAltitude,
+        calculateWindUncertainty
     };
 }
 
@@ -135,9 +180,11 @@ if (typeof module !== 'undefined' && module.exports) {
         windDirectionToRadians,
         getWindVelocityComponents,
         calculateHorizontalDrift,
+        calculateTotalWindDrift,
         estimateDownrangeDistance,
         getDownrangeExplanation,
         getWindDirectionString,
-        getWindSpeedAtAltitude
+        getWindSpeedAtAltitude,
+        calculateWindUncertainty
     };
 }
