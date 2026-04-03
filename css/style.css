@@ -193,22 +193,40 @@ button {
     gap: 0.75rem;
 }
 
-.stat-item {
-    background: rgba(78, 205, 196, 0.1);
-    padding: 0.75rem;
-    border-radius: 6px;
+.stat-box {
+    background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(78, 205, 196, 0.05));
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    border: 1px solid rgba(78, 205, 196, 0.2);
 }
 
-.stat-label {
-    font-size: 0.8rem;
-    color: #888;
-    text-transform: uppercase;
+.stat-box:hover {
+    background: linear-gradient(135deg, rgba(78, 205, 196, 0.15), rgba(78, 205, 196, 0.1));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.2);
 }
 
-.stat-value {
-    font-size: 1.4rem;
+.stat-box h4 {
+    color: #ffd700;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.stat-box span {
+    display: block;
+    font-size: 1.3rem;
     font-weight: bold;
     color: #4ecdc4;
+    margin-bottom: 0.25rem;
+}
+
+.stat-box small {
+    display: inline-block;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 /* Teaching Content */
